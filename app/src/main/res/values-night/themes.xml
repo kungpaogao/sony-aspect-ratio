@@ -1,0 +1,5 @@
+<resources>
+    <!-- Base application theme. -->
+    <style name="Base.Theme.AspectRatio" parent="@android:style/Theme.NoTitleBar">
+    </style>
+</resources>
