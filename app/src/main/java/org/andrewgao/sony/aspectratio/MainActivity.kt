@@ -10,6 +10,7 @@ import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
 import org.andrewgao.sony.aspectratio.camera.CameraSession
 import org.andrewgao.sony.aspectratio.camera.LensReading
+import org.andrewgao.sony.aspectratio.ui.CropOverlayView
 
 class MainActivity : Activity() {
     private val session = CameraSession()
@@ -17,6 +18,8 @@ class MainActivity : Activity() {
     private var surfaceReady = false
     private var resumed = false
     private var leaving = false
+    private var choosingRatio = false
+    private var aspect = AspectRatio.DEFAULT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +75,33 @@ class MainActivity : Activity() {
             leave()
             return true
         }
+        if (event.repeatCount == 0 && mapped == CameraKeys.ENTER) {
+            choosingRatio = !choosingRatio
+            showAspect()
+            return true
+        }
+        val dial = if (choosingRatio && event.repeatCount == 0) dialStep(mapped) else 0
+        if (dial != 0) {
+            aspect = AspectRatio.step(aspect, dial)
+            showAspect()
+            return true
+        }
         return super.onKeyDown(keyCode, event)
+    }
+
+    private fun dialStep(key: Int): Int {
+        if (key == CameraKeys.DIAL_1_CLOCKWISE || key == CameraKeys.DIAL_2_CLOCKWISE || key == CameraKeys.RING_CLOCKWISE) {
+            return 1
+        }
+        if (key == CameraKeys.DIAL_1_COUNTERCLOCKWISE || key == CameraKeys.DIAL_2_COUNTERCLOCKWISE || key == CameraKeys.RING_COUNTERCLOCKWISE) {
+            return -1
+        }
+        return 0
+    }
+
+    private fun showAspect() {
+        val overlay = findViewById(R.id.crop_overlay) as CropOverlayView
+        overlay.setAspect(aspect, choosingRatio)
     }
 
     private fun leave() {
