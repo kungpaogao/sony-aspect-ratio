@@ -2,4 +2,6 @@
     <string name="app_name">Aspect ratio</string>
     <string name="crop_ratio">65:24 crop</string>
     <string name="lens_waiting">Lens info…</string>
+    <string name="lens_missing">No lens reported</string>
+    <string name="camera_unavailable">Camera unavailable</string>
 </resources>
