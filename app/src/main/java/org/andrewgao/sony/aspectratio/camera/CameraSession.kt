@@ -21,6 +21,8 @@ class CameraSession {
                 choosePreviewSize(active)
                 active.setPreviewDisplay(holder)
                 active.startPreview()
+                // The framework keeps every preview frame. This screen only draws over the image.
+                active.normalCamera?.setPreviewCallback(null)
                 previewing = true
             } catch (error: Exception) {
                 Log.e(TAG, "preview failed", error)
@@ -99,7 +101,10 @@ class CameraSession {
 
     private fun androidFocalLength(active: Camera): String? {
         return try {
-            val focal = active.normalCamera?.parameters?.focalLength ?: return null
+            val parameters = active.normalCamera?.parameters ?: return null
+            val raw = parameters.get("focal-length")
+            if (raw.isNullOrEmpty()) return null
+            val focal = raw.toFloat()
             if (focal <= 0f) null else formatFocal(focal) + " mm"
         } catch (error: Exception) {
             Log.w(TAG, "focal length unavailable", error)
