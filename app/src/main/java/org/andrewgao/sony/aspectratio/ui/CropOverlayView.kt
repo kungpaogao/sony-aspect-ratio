@@ -52,10 +52,11 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         canvas.drawRect(box, stroke)
         val text = "$CROP_WIDTH:$CROP_HEIGHT"
         val textWidth = label.measureText(text)
+        val gap = resources.displayMetrics.density * 6f
         canvas.drawText(
             text,
             frame.left + (frame.width() - textWidth) / 2f,
-            frame.top + label.textSize + resources.displayMetrics.density * 4f,
+            frame.top - gap,
             label
         )
     }
