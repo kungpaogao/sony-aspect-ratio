@@ -8,7 +8,9 @@
         android:theme="@style/Theme.AspectRatio">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
