@@ -20,6 +20,9 @@ class MainActivity : Activity() {
     private var leaving = false
     private var choosingRatio = false
     private var aspect = AspectRatio.DEFAULT
+    private var lens: LensReading? = null
+    private var status: String? = null
+    private var saving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,6 +89,10 @@ class MainActivity : Activity() {
             showAspect()
             return true
         }
+        if (event.repeatCount == 0 && (mapped == CameraKeys.SHUTTER || keyCode == KeyEvent.KEYCODE_CAMERA)) {
+            shoot()
+            return true
+        }
         return super.onKeyDown(keyCode, event)
     }
 
@@ -122,23 +129,55 @@ class MainActivity : Activity() {
         showLens(session.open(surfaceHolder))
     }
 
+    private fun shoot() {
+        if (saving || leaving) return
+        saving = true
+        status = getString(R.string.saving)
+        renderInfo()
+        session.takePicture(applicationContext, aspect) { path ->
+            if (leaving) return@takePicture
+            saving = false
+            status = if (path.isNullOrBlank()) {
+                getString(R.string.save_failed)
+            } else {
+                getString(R.string.saved) + " " + fileName(path)
+            }
+            renderInfo()
+        }
+    }
+
     private fun showLens(reading: LensReading) {
+        lens = reading
+        renderInfo()
+    }
+
+    private fun renderInfo() {
         val text = findViewById(R.id.lens_info) as TextView
-        if (!reading.available) {
-            text.text = getString(R.string.camera_unavailable)
-            return
-        }
+        val reading = lens
         val lines = StringBuilder()
-        val name = reading.name
-        lines.append(if (name.isNullOrBlank()) getString(R.string.lens_missing) else name)
-        val mount = reading.mount
-        if (!mount.isNullOrBlank()) {
-            lines.append('\n').append(mount)
+        if (reading == null || !reading.available) {
+            lines.append(getString(R.string.camera_unavailable))
+        } else {
+            val name = reading.name
+            lines.append(if (name.isNullOrBlank()) getString(R.string.lens_missing) else name)
+            val mount = reading.mount
+            if (!mount.isNullOrBlank()) {
+                lines.append('\n').append(mount)
+            }
+            val focal = reading.focal
+            if (!focal.isNullOrBlank()) {
+                lines.append('\n').append(focal)
+            }
         }
-        val focal = reading.focal
-        if (!focal.isNullOrBlank()) {
-            lines.append('\n').append(focal)
+        val note = status
+        if (!note.isNullOrBlank()) {
+            lines.append('\n').append(note)
         }
         text.text = lines.toString()
+    }
+
+    private fun fileName(path: String): String {
+        val slash = path.lastIndexOf('/')
+        return if (slash < 0 || slash == path.length - 1) path else path.substring(slash + 1)
     }
 }

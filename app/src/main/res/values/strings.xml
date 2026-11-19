@@ -4,4 +4,7 @@
     <string name="lens_waiting">Lens info…</string>
     <string name="lens_missing">No lens reported</string>
     <string name="camera_unavailable">Camera unavailable</string>
+    <string name="saving">Saving…</string>
+    <string name="saved">Saved</string>
+    <string name="save_failed">Save failed</string>
 </resources>

@@ -1,9 +1,13 @@
 package org.andrewgao.sony.aspectratio.camera
 
+import android.content.Context
 import android.hardware.Camera as AndroidCamera
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.SurfaceHolder
 import com.github.ma1co.openmemories.framework.Camera
+import org.andrewgao.sony.aspectratio.AspectRatio
 import kotlin.math.roundToInt
 
 /**
@@ -11,12 +15,14 @@ import kotlin.math.roundToInt
  * The framework uses CameraEx on a body and android.hardware.Camera on the emulator.
  */
 class CameraSession {
+    private val mainHandler = Handler(Looper.getMainLooper())
     private var camera: Camera? = null
     private var previewing = false
+    private var capturing = false
 
     fun open(holder: SurfaceHolder): LensReading {
         val active = camera ?: openCamera() ?: return LensReading.unavailable()
-        if (!previewing) {
+        if (!previewing && !capturing) {
             try {
                 choosePreviewSize(active)
                 active.setPreviewDisplay(holder)
@@ -33,10 +39,51 @@ class CameraSession {
         return readLens(active)
     }
 
+    fun takePicture(context: Context, aspect: AspectRatio, onDone: (String?) -> Unit) {
+        val active = camera
+        if (active == null || capturing || !previewing) {
+            onDone(null)
+            return
+        }
+        capturing = true
+        previewing = false
+        active.setJpegListener { jpeg ->
+            active.setJpegListener(null)
+            Thread {
+                val path = try {
+                    if (jpeg == null || jpeg.isEmpty()) null else JpegStore.save(context, jpeg, aspect)
+                } catch (error: Exception) {
+                    Log.e(TAG, "save failed", error)
+                    null
+                }
+                mainHandler.post {
+                    capturing = false
+                    if (camera == active) resumePreview(active)
+                    onDone(path)
+                }
+            }.start()
+        }
+        try {
+            active.takePicture()
+        } catch (error: Exception) {
+            Log.e(TAG, "takePicture failed", error)
+            active.setJpegListener(null)
+            capturing = false
+            resumePreview(active)
+            onDone(null)
+        }
+    }
+
     fun release() {
         val active = camera ?: return
         camera = null
         previewing = false
+        capturing = false
+        try {
+            active.setJpegListener(null)
+        } catch (error: Exception) {
+            Log.w(TAG, "jpeg listener clear failed", error)
+        }
         try {
             active.stopPreview()
         } catch (error: Exception) {
@@ -46,6 +93,17 @@ class CameraSession {
             active.release()
         } catch (error: Exception) {
             Log.e(TAG, "release failed", error)
+        }
+    }
+
+    private fun resumePreview(active: Camera) {
+        try {
+            active.startPreview()
+            active.normalCamera?.setPreviewCallback(null)
+            previewing = true
+        } catch (error: Exception) {
+            Log.e(TAG, "preview restart failed", error)
+            previewing = false
         }
     }
 
