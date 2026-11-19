@@ -7,16 +7,18 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import org.andrewgao.sony.aspectratio.AspectRatio
+import org.andrewgao.sony.aspectratio.centeredCrop
 
 /**
- * Largest 65:24 rectangle that fits the preview, with the rest dimmed.
- * 65:24 is the XPan frame.
+ * Largest rectangle of the selected aspect that fits the preview, with the rest dimmed.
  */
 class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val dim = Paint()
     private val stroke = Paint()
     private val outline = Paint()
     private val label = Paint()
+    private var aspect = AspectRatio.DEFAULT
 
     init {
         dim.color = 0x99000000.toInt()
@@ -35,8 +37,20 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         setWillNotDraw(false)
     }
 
+    fun setAspect(next: AspectRatio, choosing: Boolean) {
+        aspect = next
+        label.color = if (choosing) Color.YELLOW else Color.WHITE
+        invalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
-        val frame = cropFrame(width.toFloat(), height.toFloat(), CROP_WIDTH, CROP_HEIGHT)
+        val crop = centeredCrop(width, height, aspect)
+        val frame = RectF(
+            crop.left.toFloat(),
+            crop.top.toFloat(),
+            (crop.left + crop.width).toFloat(),
+            (crop.top + crop.height).toFloat()
+        )
         canvas.drawRect(0f, 0f, width.toFloat(), frame.top, dim)
         canvas.drawRect(0f, frame.bottom, width.toFloat(), height.toFloat(), dim)
         canvas.drawRect(0f, frame.top, frame.left, frame.bottom, dim)
@@ -50,7 +64,7 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         )
         canvas.drawRect(box, outline)
         canvas.drawRect(box, stroke)
-        val text = "$CROP_WIDTH:$CROP_HEIGHT"
+        val text = aspect.label
         val textWidth = label.measureText(text)
         val gap = resources.displayMetrics.density * 6f
         canvas.drawText(
@@ -60,29 +74,4 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
             label
         )
     }
-
-    companion object {
-        const val CROP_WIDTH = 65
-        const val CROP_HEIGHT = 24
-    }
-}
-
-internal fun cropFrame(width: Float, height: Float, aspectWidth: Int, aspectHeight: Int): RectF {
-    if (width <= 0f || height <= 0f || aspectWidth <= 0 || aspectHeight <= 0) {
-        return RectF()
-    }
-    val target = aspectWidth.toFloat() / aspectHeight.toFloat()
-    val view = width / height
-    val cropWidth: Float
-    val cropHeight: Float
-    if (view > target) {
-        cropHeight = height
-        cropWidth = height * target
-    } else {
-        cropWidth = width
-        cropHeight = width / target
-    }
-    val left = (width - cropWidth) / 2f
-    val top = (height - cropHeight) / 2f
-    return RectF(left, top, left + cropWidth, top + cropHeight)
 }
