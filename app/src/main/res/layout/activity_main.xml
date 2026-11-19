@@ -17,4 +17,15 @@
         android:layout_height="match_parent"
         android:contentDescription="@string/crop_ratio" />
 
+    <TextView
+        android:id="@+id/lens_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#CC000000"
+        android:padding="8dp"
+        android:text="@string/lens_waiting"
+        android:textColor="#FFFFFFFF"
+        android:textSize="16sp" />
+
 </FrameLayout>
