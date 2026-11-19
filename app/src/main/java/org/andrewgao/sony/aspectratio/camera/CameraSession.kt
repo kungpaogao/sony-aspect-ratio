@@ -42,13 +42,15 @@ class CameraSession {
     fun takePicture(context: Context, aspect: AspectRatio, onDone: (String?) -> Unit) {
         val active = camera
         if (active == null || capturing || !previewing) {
-            onDone(null)
+            Log.w(TAG, "shutter ignored camera=" + (active != null) + " capturing=" + capturing + " previewing=" + previewing)
+            if (!capturing) onDone(null)
             return
         }
         capturing = true
         previewing = false
         active.setJpegListener { jpeg ->
             active.setJpegListener(null)
+            Log.i(TAG, "jpeg bytes=" + (jpeg?.size ?: -1))
             Thread {
                 val path = try {
                     if (jpeg == null || jpeg.isEmpty()) null else JpegStore.save(context, jpeg, aspect)
