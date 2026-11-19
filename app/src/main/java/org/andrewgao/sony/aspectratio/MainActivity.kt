@@ -1,10 +1,13 @@
 package org.andrewgao.sony.aspectratio
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.TextView
+import com.github.ma1co.openmemories.framework.CameraKeys
 import org.andrewgao.sony.aspectratio.camera.CameraSession
 import org.andrewgao.sony.aspectratio.camera.LensReading
 
@@ -13,6 +16,7 @@ class MainActivity : Activity() {
     private var holder: SurfaceHolder? = null
     private var surfaceReady = false
     private var resumed = false
+    private var leaving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +60,31 @@ class MainActivity : Activity() {
         resumed = false
         session.release()
         super.onPause()
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        val mapped = try {
+            CameraKeys.fromKeyEvent(event)
+        } catch (_: Exception) {
+            0
+        }
+        if (mapped == CameraKeys.MENU || mapped == CameraKeys.DELETE || keyCode == KeyEvent.KEYCODE_BACK) {
+            leave()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun leave() {
+        if (leaving) return
+        leaving = true
+        session.release()
+        finish()
+        startActivity(
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME)
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        )
     }
 
     private fun startPreview() {
