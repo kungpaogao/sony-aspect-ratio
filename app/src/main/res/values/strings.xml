@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Aspect ratio</string>
+    <string name="crop_ratio">65:24 crop</string>
 </resources>
