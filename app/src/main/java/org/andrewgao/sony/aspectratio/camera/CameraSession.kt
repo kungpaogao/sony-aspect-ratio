@@ -17,6 +17,7 @@ import com.github.ma1co.openmemories.framework.StillImage
 import com.github.ma1co.openmemories.framework.StillImage.TYPE_FULL
 import com.github.ma1co.openmemories.framework.StillImage.TYPE_SCREEN
 import org.andrewgao.sony.aspectratio.AspectRatio
+import org.andrewgao.sony.aspectratio.centeredCrop
 import java.util.concurrent.atomic.AtomicBoolean
 import android.hardware.Camera as AndroidCamera
 
@@ -93,9 +94,29 @@ class CameraSession {
             try {
                 // reset resources
                 active.setJpegListener(null)
-//                active.cancelTakePicture()
-//                active.startPreview()
-                finish("jpeg saved")
+                active.cancelTakePicture()
+                active.startPreview()
+                val stillImage = StillImage.DeviceImage.fromJpeg(jpeg)
+                Log.d(TAG, "jpeg listener image is device: ${stillImage is StillImage.DeviceImage}")
+                Log.d(TAG, "still image valid: ${stillImage.isValid}")
+//                val croppedImage = ImageFilters.crop(
+//                    stillImage,
+//                    Rect(100, 100, 200, 200)
+//                )
+//                Log.d(TAG, "image: ${croppedImage.isValid}")
+//                // returns null -> crashes when trying to get height/width
+////                Log.d(TAG, "jpeg cropped, size: ${croppedImage.height}x${croppedImage.width}")
+//                val mediaManager = MediaManager.create(context)
+//                val mediaId = mediaManager?.mediaIds?.firstOrNull()
+//                Log.d(TAG, "mediaId: $mediaId")
+//                val saved = JpegSaver.save(
+//                    context,
+//                    croppedImage,
+//                    mediaId,
+//                    QUALITY_EXTRA_FINE,
+//                )
+//                Log.d(TAG, "saved: $saved")
+                finish("jpeg listener finished")
             } catch (error: Exception) {
                 Trace.line("jpeg listener " + error.javaClass.simpleName + " " + error.message)
                 finish("errored out")
@@ -114,29 +135,38 @@ class CameraSession {
 
     fun processLatestImage(context: Context) {
         try {
-
-            // this is the error here, basically we need to create a device image
-//                val image = StillImage.fromJpeg(jpeg)
             val mediaManager = MediaManager.create(context)
+            val mediaId = mediaManager?.mediaIds?.firstOrNull()
+            Log.d(TAG, "mediaId: $mediaId")
+            mediaManager.waitForDatabase(mediaId)
             val cursor = mediaManager.queryNewestImages()
             Log.d(TAG, "cursor length: ${cursor.count}")
             // move to newest image
             cursor.moveToFirst()
             val imageInfo = mediaManager.getImageInfo(cursor)
+//            val uri = imageInfo.uri
+//            val imageUri = imageInfo.imageUri
+//            Log.d(TAG, "uri: $uri")
+//            Log.d(TAG, "image uri: $imageUri")
             cursor.close()
 //                Log.d(TAG, "first imageInfo: $imageId")
 //                val path = "content://com.sony.scalar.providers.avindex/1000/images/media/$imageId"
+//            content://com.sony.scalar.providers.avindex/1000/images/media/925
             val root = Environment.getExternalStorageDirectory().path
             Log.d(TAG, "root: $root")
             val path = "$root/DCIM/${imageInfo.folder}/${imageInfo.filename}"
             Log.d(TAG, "image path: $path")
             val image = StillImage.decodeFile(path, TYPE_FULL)
+//            val image = StillImage.decodeFile(imageUri.toString(), TYPE_FULL)
+//            val uriPathImage = StillImage.decodeFile(imageUri.path, TYPE_FULL)
             // error when decoding the image
             // 1004 -> SCALAR_ERROR_BUSY
             // 1200 -> SCALAR_ERROR_INVALID_PATH
             Log.d(TAG, "image is device image: ${image is StillImage.DeviceImage}")
             // always invalid for some reason???????????
-            Log.d(TAG, "image: ${image.isValid}")
+//            Log.d(TAG, "image: ${image.isValid}")
+//            Log.d(TAG, "uri image: ${uriImage.isValid}")
+//            Log.d(TAG, "uri path image: ${uriPathImage.isValid}")
             val croppedImage = ImageFilters.crop(
                 image,
                 Rect(100, 100, 200, 200)
@@ -144,8 +174,6 @@ class CameraSession {
             Log.d(TAG, "image: ${croppedImage.isValid}")
             // returns null -> crashes when trying to get height/width
 //                Log.d(TAG, "jpeg cropped, size: ${croppedImage.height}x${croppedImage.width}")
-            val mediaId = mediaManager?.mediaIds?.firstOrNull()
-            Log.d(TAG, "mediaId: $mediaId")
             val saved = JpegSaver.save(
                 context,
                 croppedImage,
@@ -154,7 +182,7 @@ class CameraSession {
             )
             Log.d(TAG, "jpeg saved: $saved")
         } catch (e: Exception) {
-            Log.e(TAG, e.toString())
+            Log.e(TAG, "error processing", e)
         }
     }
 
