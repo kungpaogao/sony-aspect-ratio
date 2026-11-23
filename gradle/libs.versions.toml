@@ -8,7 +8,7 @@ appcompat = "1.6.1"
 material = "1.10.0"
 activityKtx = "1.13.0"
 constraintlayout = "2.1.4"
-openmemories = "0.2.0"
+openmemories = "0.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -21,7 +21,6 @@ androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", ve
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
 openmemories-framework = { group = "com.github.kungpaogao.OpenMemories-Framework", name = "framework", version.ref = "openmemories" }
-openmemories-stubs = { group = "com.github.kungpaogao.OpenMemories-Framework", name = "stubs", version.ref = "openmemories" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

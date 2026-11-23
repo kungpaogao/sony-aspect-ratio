@@ -34,7 +34,5 @@ android {
 
 dependencies {
     implementation(libs.openmemories.framework)
-    // Sony API stubs for the direct com.sony.scalar calls. Never packaged: the camera provides the real classes.
-    compileOnly(libs.openmemories.stubs)
     testImplementation(libs.junit)
 }
