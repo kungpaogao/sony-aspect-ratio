@@ -6,10 +6,15 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
+import com.github.ma1co.openmemories.framework.CaptureSequence
+import com.github.ma1co.openmemories.framework.DeviceInfo
+import com.sony.scalar.hardware.CameraSequence
 import org.andrewgao.sony.aspectratio.camera.CameraSession
-import org.andrewgao.sony.aspectratio.camera.LensReading
+import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
 
 class MainActivity : Activity() {
@@ -20,8 +25,6 @@ class MainActivity : Activity() {
     private var leaving = false
     private var choosingRatio = false
     private var aspect = AspectRatio.DEFAULT
-    private var lens: LensReading? = null
-    private var status: String? = null
     private var saving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +57,8 @@ class MainActivity : Activity() {
                 if (holder == surfaceHolder) holder = null
             }
         })
+        if (!onCamera()) showDebugKeys()
+        log("15 start " + Trace.location())
     }
 
     override fun onResume() {
@@ -69,31 +74,72 @@ class MainActivity : Activity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        val mapped = try {
-            CameraKeys.fromKeyEvent(event)
-        } catch (_: Exception) {
-            0
-        }
+        if (event.repeatCount != 0) return super.onKeyDown(keyCode, event)
+        val mapped = emulatorKey(keyCode) ?: cameraKey(event)
         if (mapped == CameraKeys.MENU || mapped == CameraKeys.DELETE || keyCode == KeyEvent.KEYCODE_BACK) {
             leave()
             return true
         }
-        if (event.repeatCount == 0 && mapped == CameraKeys.ENTER) {
+        if (handleControl(mapped)) return true
+        if (mapped == CameraKeys.SHUTTER || keyCode == KeyEvent.KEYCODE_CAMERA) {
+            shoot()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    private fun showDebugKeys() {
+        val bar = findViewById(R.id.debug_keys) as View
+        bar.visibility = View.VISIBLE
+        (findViewById(R.id.debug_ok) as Button).setOnClickListener { handleControl(CameraKeys.ENTER) }
+        (findViewById(R.id.debug_minus) as Button).setOnClickListener {
+            handleControl(CameraKeys.DIAL_1_COUNTERCLOCKWISE)
+        }
+        (findViewById(R.id.debug_plus) as Button).setOnClickListener {
+            handleControl(CameraKeys.DIAL_1_CLOCKWISE)
+        }
+        (findViewById(R.id.debug_shutter) as Button).setOnClickListener { shoot() }
+    }
+
+    private fun emulatorKey(keyCode: Int): Int? {
+        if (onCamera()) return null
+        return when (keyCode) {
+            KeyEvent.KEYCODE_A -> CameraKeys.ENTER
+            KeyEvent.KEYCODE_S -> CameraKeys.DIAL_1_COUNTERCLOCKWISE
+            KeyEvent.KEYCODE_D -> CameraKeys.DIAL_1_CLOCKWISE
+            else -> null
+        }
+    }
+
+    private fun cameraKey(event: KeyEvent): Int {
+        return try {
+            CameraKeys.fromKeyEvent(event)
+        } catch (_: Exception) {
+            0
+        }
+    }
+
+    private fun handleControl(mapped: Int): Boolean {
+        if (mapped == CameraKeys.ENTER) {
             choosingRatio = !choosingRatio
             showAspect()
             return true
         }
-        val dial = if (choosingRatio && event.repeatCount == 0) dialStep(mapped) else 0
+        val dial = if (choosingRatio) dialStep(mapped) else 0
         if (dial != 0) {
             aspect = AspectRatio.step(aspect, dial)
             showAspect()
             return true
         }
-        if (event.repeatCount == 0 && (mapped == CameraKeys.SHUTTER || keyCode == KeyEvent.KEYCODE_CAMERA)) {
-            shoot()
-            return true
+        return false
+    }
+
+    private fun onCamera(): Boolean {
+        return try {
+            DeviceInfo.getInstance().isCamera
+        } catch (_: Exception) {
+            false
         }
-        return super.onKeyDown(keyCode, event)
     }
 
     private fun dialStep(key: Int): Int {
@@ -126,58 +172,26 @@ class MainActivity : Activity() {
     private fun startPreview() {
         val surfaceHolder = holder
         if (!resumed || !surfaceReady || surfaceHolder == null) return
-        showLens(session.open(surfaceHolder))
+
+        session.open(surfaceHolder)
     }
 
     private fun shoot() {
         if (saving || leaving) return
         saving = true
-        status = getString(R.string.saving)
-        renderInfo()
-        session.takePicture(applicationContext, aspect) { path ->
+        log("shutter " + aspect.label)
+        session.takePicture(applicationContext, aspect) { message ->
             if (leaving) return@takePicture
-            saving = false
-            status = if (path.isNullOrBlank()) {
-                getString(R.string.save_failed)
-            } else {
-                getString(R.string.saved) + " " + fileName(path)
-            }
-            renderInfo()
+            val finished = !message.startsWith("jpeg ") && !message.startsWith("stored ")
+            if (finished) saving = false
+            session.processLatestImage(applicationContext)
+            log(message)
         }
     }
 
-    private fun showLens(reading: LensReading) {
-        lens = reading
-        renderInfo()
-    }
-
-    private fun renderInfo() {
-        val text = findViewById(R.id.lens_info) as TextView
-        val reading = lens
-        val lines = StringBuilder()
-        if (reading == null || !reading.available) {
-            lines.append(getString(R.string.camera_unavailable))
-        } else {
-            val name = reading.name
-            lines.append(if (name.isNullOrBlank()) getString(R.string.lens_missing) else name)
-            val mount = reading.mount
-            if (!mount.isNullOrBlank()) {
-                lines.append('\n').append(mount)
-            }
-            val focal = reading.focal
-            if (!focal.isNullOrBlank()) {
-                lines.append('\n').append(focal)
-            }
-        }
-        val note = status
-        if (!note.isNullOrBlank()) {
-            lines.append('\n').append(note)
-        }
-        text.text = lines.toString()
-    }
-
-    private fun fileName(path: String): String {
-        val slash = path.lastIndexOf('/')
-        return if (slash < 0 || slash == path.length - 1) path else path.substring(slash + 1)
+    private fun log(message: String) {
+        Trace.line(message)
+        val text = findViewById(R.id.log) as TextView
+        text.text = message
     }
 }

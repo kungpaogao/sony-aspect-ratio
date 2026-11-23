@@ -7,4 +7,8 @@
     <string name="saving">Saving…</string>
     <string name="saved">Saved</string>
     <string name="save_failed">Save failed</string>
+    <string name="debug_ok">A  OK</string>
+    <string name="debug_minus">S  −</string>
+    <string name="debug_plus">D  +</string>
+    <string name="debug_shutter">Shutter</string>
 </resources>
