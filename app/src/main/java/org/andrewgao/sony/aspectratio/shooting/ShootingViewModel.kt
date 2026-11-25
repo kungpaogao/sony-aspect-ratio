@@ -130,15 +130,12 @@ class ShootingViewModel(
     }
 
     /**
-     * Half-press and the AEL button (back-button focus) hold focus; a full press then shoots with
-     * it. The a7R's AEL button arrives as 638 (AF_MF_AEL); 532 and 533 cover the other lever
+     * Back-button focus: the AEL button holds focus and the shutter shoots with it; half-press does
+     * nothing. The a7R's AEL button arrives as 638 (AF_MF_AEL); 532 and 533 cover the other lever
      * positions.
      */
     private fun isFocusKey(key: Int): Boolean =
-        key == CameraKeys.SHUTTER_HALF ||
-            key == CameraKeys.AF_MF_AEL ||
-            key == CameraKeys.AEL ||
-            key == CameraKeys.AF_MF
+        key == CameraKeys.AF_MF_AEL || key == CameraKeys.AEL || key == CameraKeys.AF_MF
 
     fun onKeyUp(key: Int): Boolean {
         if (isFocusKey(key)) {
