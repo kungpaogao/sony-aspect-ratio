@@ -8,11 +8,9 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import org.andrewgao.sony.aspectratio.AspectRatio
-import org.andrewgao.sony.aspectratio.centeredCrop
+import org.andrewgao.sony.aspectratio.CropRect
 
-/**
- * Largest rectangle of the selected aspect that fits the preview, with the rest dimmed.
- */
+/** Largest rectangle of the selected aspect that fits the preview, with the rest dimmed. */
 class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val dim = Paint()
     private val stroke = Paint()
@@ -44,24 +42,26 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
     }
 
     override fun onDraw(canvas: Canvas) {
-        val crop = centeredCrop(width, height, aspect)
-        val frame = RectF(
-            crop.left.toFloat(),
-            crop.top.toFloat(),
-            (crop.left + crop.width).toFloat(),
-            (crop.top + crop.height).toFloat()
-        )
+        val crop = CropRect.centered(width, height, aspect)
+        val frame =
+            RectF(
+                crop.left.toFloat(),
+                crop.top.toFloat(),
+                crop.right.toFloat(),
+                crop.bottom.toFloat(),
+            )
         canvas.drawRect(0f, 0f, width.toFloat(), frame.top, dim)
         canvas.drawRect(0f, frame.bottom, width.toFloat(), height.toFloat(), dim)
         canvas.drawRect(0f, frame.top, frame.left, frame.bottom, dim)
         canvas.drawRect(frame.right, frame.top, width.toFloat(), frame.bottom, dim)
         val half = outline.strokeWidth / 2f
-        val box = RectF(
-            frame.left + half,
-            frame.top + half,
-            frame.right - half,
-            frame.bottom - half
-        )
+        val box =
+            RectF(
+                frame.left + half,
+                frame.top + half,
+                frame.right - half,
+                frame.bottom - half,
+            )
         canvas.drawRect(box, outline)
         canvas.drawRect(box, stroke)
         val text = aspect.label
@@ -71,7 +71,7 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
             text,
             frame.left + (frame.width() - textWidth) / 2f,
             frame.top - gap,
-            label
+            label,
         )
     }
 }
