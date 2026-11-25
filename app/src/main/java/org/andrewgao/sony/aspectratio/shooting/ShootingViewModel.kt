@@ -103,11 +103,27 @@ class ShootingViewModel(
             setState { it.copy(choosingRatio = !it.choosingRatio) }
             return true
         }
-        val dial = if (state.value.choosingRatio) dialStep(key) else 0
-        if (dial != 0) {
-            setState {
-                it.copy(aspect = AspectRatio.step(it.aspect, dial))
+        if (state.value.choosingRatio) {
+            val dial = dialStep(key)
+            if (dial != 0) {
+                setState {
+                    it.copy(aspect = AspectRatio.step(it.aspect, dial))
+                }
+                return true
             }
+            return false
+        }
+        if (key == CameraKeys.EV_DIAL) {
+            session.controls.applyEvDial()
+            return true
+        }
+        if (key == CameraKeys.MODE_DIAL) {
+            session.controls.refresh()
+            return true
+        }
+        val action = dialAction(state.value.exposureMode, key)
+        if (action != null) {
+            session.controls.apply(action)
             return true
         }
         return false

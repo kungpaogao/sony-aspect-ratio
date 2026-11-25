@@ -4,20 +4,19 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.Locale
 import kotlin.math.abs
+import org.andrewgao.sony.aspectratio.camera.Exposure
 
 /**
  * Formats camera values the way the native shooting screen shows them (rules from Sony's own
  * views).
  */
 object ExposureFormat {
-    /** Sony reports BULB as the shutter speed 65535/1. */
-    private const val BULB_NUMERATOR = 65535
     private const val SHOTS_CAP = 9999
 
     /** `1/250` below 0.4 s, `0.5"` up to 10 s, `30"` from 10 s or for whole seconds, `BULB`. */
     fun shutter(numerator: Int, denominator: Int): String {
         if (denominator == 0) return "--"
-        if (numerator == BULB_NUMERATOR && denominator == 1) return "BULB"
+        if (numerator == Exposure.BULB_NUMERATOR && denominator == 1) return "BULB"
         val seconds = roundOneDecimal(numerator.toFloat() / denominator)
         return when {
             seconds < 0.4f -> "$numerator/$denominator"

@@ -9,9 +9,11 @@ class DialStepTest {
     fun dialsAndRingStepTheAspect() {
         assertEquals(1, dialStep(CameraKeys.DIAL_1_CLOCKWISE))
         assertEquals(1, dialStep(CameraKeys.DIAL_2_CLOCKWISE))
+        assertEquals(1, dialStep(CameraKeys.WHEEL_CLOCKWISE))
         assertEquals(1, dialStep(CameraKeys.RING_CLOCKWISE))
         assertEquals(-1, dialStep(CameraKeys.DIAL_1_COUNTERCLOCKWISE))
         assertEquals(-1, dialStep(CameraKeys.DIAL_2_COUNTERCLOCKWISE))
+        assertEquals(-1, dialStep(CameraKeys.WHEEL_COUNTERCLOCKWISE))
         assertEquals(-1, dialStep(CameraKeys.RING_COUNTERCLOCKWISE))
     }
 
