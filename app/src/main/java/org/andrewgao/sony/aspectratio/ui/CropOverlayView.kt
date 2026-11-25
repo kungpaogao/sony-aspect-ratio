@@ -13,31 +13,28 @@ import org.andrewgao.sony.aspectratio.CropRect
 /** Largest rectangle of the selected aspect that fits the preview, with the rest dimmed. */
 class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val dim = Paint()
-    private val stroke = Paint()
-    private val outline = Paint()
-    private val label = Paint()
+    private val outerBlack = Paint()
+    private val whiteBand = Paint()
+    private val innerBlack = Paint()
     private var aspect = AspectRatio.DEFAULT
 
     init {
-        dim.color = 0x99000000.toInt()
+        dim.color = 0xBD6E6E6E.toInt()
         dim.style = Paint.Style.FILL
-        val density = resources.displayMetrics.density
-        stroke.color = Color.WHITE
-        stroke.style = Paint.Style.STROKE
-        stroke.strokeWidth = density * 2f
-        outline.color = Color.BLACK
-        outline.style = Paint.Style.STROKE
-        outline.strokeWidth = density * 4f
-        label.color = Color.WHITE
-        label.textSize = resources.displayMetrics.density * 14f
-        label.isAntiAlias = true
-        label.setShadowLayer(2f, 0f, 1f, Color.BLACK)
+        outerBlack.color = Color.BLACK
+        outerBlack.style = Paint.Style.STROKE
+        outerBlack.strokeWidth = 1f
+        whiteBand.color = Color.WHITE
+        whiteBand.style = Paint.Style.STROKE
+        whiteBand.strokeWidth = 4f
+        innerBlack.color = Color.BLACK
+        innerBlack.style = Paint.Style.STROKE
+        innerBlack.strokeWidth = 1f
         setWillNotDraw(false)
     }
 
-    fun setAspect(next: AspectRatio, choosing: Boolean) {
+    fun setAspect(next: AspectRatio) {
         aspect = next
-        label.color = if (choosing) Color.YELLOW else Color.WHITE
         invalidate()
     }
 
@@ -54,24 +51,32 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         canvas.drawRect(0f, frame.bottom, width.toFloat(), height.toFloat(), dim)
         canvas.drawRect(0f, frame.top, frame.left, frame.bottom, dim)
         canvas.drawRect(frame.right, frame.top, width.toFloat(), frame.bottom, dim)
-        val half = outline.strokeWidth / 2f
-        val box =
+        val halfOuter = outerBlack.strokeWidth / 2f
+        val outer =
             RectF(
-                frame.left + half,
-                frame.top + half,
-                frame.right - half,
-                frame.bottom - half,
+                frame.left + halfOuter,
+                frame.top + halfOuter,
+                frame.right - halfOuter,
+                frame.bottom - halfOuter,
             )
-        canvas.drawRect(box, outline)
-        canvas.drawRect(box, stroke)
-        val text = aspect.label
-        val textWidth = label.measureText(text)
-        val gap = resources.displayMetrics.density * 6f
-        canvas.drawText(
-            text,
-            frame.left + (frame.width() - textWidth) / 2f,
-            frame.top - gap,
-            label,
-        )
+        canvas.drawRect(outer, outerBlack)
+        val insetWhite = halfOuter + outerBlack.strokeWidth / 2f + whiteBand.strokeWidth / 2f
+        val white =
+            RectF(
+                frame.left + insetWhite,
+                frame.top + insetWhite,
+                frame.right - insetWhite,
+                frame.bottom - insetWhite,
+            )
+        canvas.drawRect(white, whiteBand)
+        val insetInner = insetWhite + whiteBand.strokeWidth / 2f + innerBlack.strokeWidth / 2f
+        val inner =
+            RectF(
+                frame.left + insetInner,
+                frame.top + insetInner,
+                frame.right - insetInner,
+                frame.bottom - insetInner,
+            )
+        canvas.drawRect(inner, innerBlack)
     }
 }

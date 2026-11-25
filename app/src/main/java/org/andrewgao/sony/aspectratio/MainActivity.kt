@@ -2,12 +2,15 @@ package org.andrewgao.sony.aspectratio
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
 import com.github.ma1co.openmemories.framework.DeviceInfo
@@ -15,6 +18,7 @@ import org.andrewgao.sony.aspectratio.shared.StateBinding
 import org.andrewgao.sony.aspectratio.shooting.ShootingState
 import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
+import org.andrewgao.sony.aspectratio.ui.NativeIcons
 
 class MainActivity : Activity() {
     private lateinit var viewModel: ShootingViewModel
@@ -22,6 +26,19 @@ class MainActivity : Activity() {
     private lateinit var surface: SurfaceView
     private lateinit var overlay: CropOverlayView
     private lateinit var logView: TextView
+    private lateinit var modeIcon: ImageView
+    private lateinit var modeText: TextView
+    private lateinit var aspectChip: TextView
+    private lateinit var shotsIcon: ImageView
+    private lateinit var shotsText: TextView
+    private lateinit var batteryIcon: ImageView
+    private lateinit var batteryText: TextView
+    private lateinit var shutterText: TextView
+    private lateinit var apertureText: TextView
+    private lateinit var exposureText: TextView
+    private lateinit var isoIcon: ImageView
+    private lateinit var isoLabel: TextView
+    private lateinit var isoValue: TextView
     private var leaving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +47,19 @@ class MainActivity : Activity() {
         surface = findViewById(R.id.preview_surface) as SurfaceView
         overlay = findViewById(R.id.crop_overlay) as CropOverlayView
         logView = findViewById(R.id.log) as TextView
+        modeIcon = findViewById(R.id.mode_icon) as ImageView
+        modeText = findViewById(R.id.mode_text) as TextView
+        aspectChip = findViewById(R.id.aspect_chip) as TextView
+        shotsIcon = findViewById(R.id.shots_icon) as ImageView
+        shotsText = findViewById(R.id.shots_text) as TextView
+        batteryIcon = findViewById(R.id.battery_icon) as ImageView
+        batteryText = findViewById(R.id.battery_text) as TextView
+        shutterText = findViewById(R.id.shutter_text) as TextView
+        apertureText = findViewById(R.id.aperture_text) as TextView
+        exposureText = findViewById(R.id.exposure_text) as TextView
+        isoIcon = findViewById(R.id.iso_icon) as ImageView
+        isoLabel = findViewById(R.id.iso_label) as TextView
+        isoValue = findViewById(R.id.iso_value) as TextView
         viewModel =
             ShootingViewModel(
                 applicationContext,
@@ -124,8 +154,32 @@ class MainActivity : Activity() {
     }
 
     private fun render(state: ShootingState) {
-        overlay.setAspect(state.aspect, state.choosingRatio)
+        overlay.setAspect(state.aspect)
         logView.text = state.message
+
+        showIcon(modeIcon, NativeIcons.modeDrawable(resources, state.exposureMode), modeText)
+        modeText.text = state.mode
+
+        aspectChip.text = state.aspect.label
+        aspectChip.setTextColor(if (state.choosingRatio) 0xFFFFDD00.toInt() else Color.WHITE)
+
+        showIcon(shotsIcon, NativeIcons.drawable(resources, NativeIcons.CARD))
+        shotsText.text = state.shots
+        showIcon(batteryIcon, NativeIcons.batteryDrawable(resources, state.batteryLevel))
+        batteryText.text = state.battery
+
+        shutterText.text = state.shutter
+        apertureText.text = state.aperture
+        exposureText.text = state.exposure
+        showIcon(isoIcon, NativeIcons.drawable(resources, NativeIcons.ISO_LABEL), isoLabel)
+        isoValue.text = " ${state.iso}"
+    }
+
+    /** Shows the camera's own [drawable] in [icon] when there is one, else the text [fallback]. */
+    private fun showIcon(icon: ImageView, drawable: Drawable?, fallback: View? = null) {
+        icon.setImageDrawable(drawable)
+        icon.visibility = if (drawable != null) View.VISIBLE else View.GONE
+        fallback?.visibility = if (drawable != null) View.GONE else View.VISIBLE
     }
 
     private fun leave() {
