@@ -50,6 +50,12 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        optIn.add("kotlinx.coroutines.ExperimentalCoroutinesApi")
+    }
+}
+
 dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.openmemories.framework)
