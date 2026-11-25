@@ -1,6 +1,7 @@
 package org.andrewgao.sony.aspectratio.shooting
 
 import org.andrewgao.sony.aspectratio.AspectRatio
+import org.andrewgao.sony.aspectratio.CropRect
 
 data class ShootingState(
     val aspect: AspectRatio = AspectRatio.DEFAULT,
@@ -17,4 +18,5 @@ data class ShootingState(
     val focus: Focus = Focus.IDLE,
     val exposureMode: ExposureMode = ExposureMode.UNKNOWN,
     val batteryLevel: Int = -1,
+    val liveView: CropRect? = null,
 )

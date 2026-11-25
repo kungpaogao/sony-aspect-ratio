@@ -32,6 +32,12 @@ data class CropRect(val left: Int, val top: Int, val width: Int, val height: Int
             return CropRect((frameWidth - width) / 2, (frameHeight - height) / 2, width, height)
         }
 
+        /** [centered] inside [area], offset by [area]'s top-left corner. */
+        fun centeredIn(area: CropRect, aspect: AspectRatio): CropRect {
+            val inner = centered(area.width, area.height, aspect)
+            return CropRect(area.left + inner.left, area.top + inner.top, inner.width, inner.height)
+        }
+
         /**
          * [centered], snapped down to [ALIGN] so the hardware crop and JPEG encoder behind
          * ImageFilters.crop and JpegSaver accept it. A crop within one block of the frame (3:2 on a

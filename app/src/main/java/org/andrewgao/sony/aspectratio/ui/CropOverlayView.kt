@@ -17,6 +17,7 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
     private val whiteBand = Paint()
     private val innerBlack = Paint()
     private var aspect = AspectRatio.DEFAULT
+    private var liveView: CropRect? = null
 
     init {
         dim.color = 0xBD6E6E6E.toInt()
@@ -38,8 +39,14 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         invalidate()
     }
 
+    fun setLiveView(area: CropRect?) {
+        liveView = area
+        invalidate()
+    }
+
     override fun onDraw(canvas: Canvas) {
-        val crop = CropRect.centered(width, height, aspect)
+        val bounds = liveView ?: CropRect(0, 0, width, height)
+        val crop = CropRect.centeredIn(bounds, aspect)
         val frame =
             RectF(
                 crop.left.toFloat(),

@@ -4,9 +4,11 @@ import android.content.Context
 import android.view.SurfaceHolder
 import com.github.ma1co.openmemories.framework.CameraKeys
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.andrewgao.sony.aspectratio.AspectRatio
 import org.andrewgao.sony.aspectratio.camera.CropSession
+import org.andrewgao.sony.aspectratio.camera.LiveViewArea
 import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.shared.ViewModel
 
@@ -16,12 +18,16 @@ class ShootingViewModel(
     initialMessage: String = "",
 ) : ViewModel<ShootingState>(ShootingState(message = initialMessage)) {
     private val session = CropSession.create(recreateSurface = recreateSurface, onStatus = ::status)
+    private val liveViewArea = LiveViewArea()
     private var shot: Job? = null
     private var holder: SurfaceHolder? = null
     private var started = false
 
     init {
         if (initialMessage.isNotEmpty()) Trace.line(initialMessage)
+        scope.launch {
+            liveViewArea.area.collect { area -> setState { it.copy(liveView = area) } }
+        }
     }
 
     fun onSurface(surfaceHolder: SurfaceHolder?) {
@@ -37,11 +43,13 @@ class ShootingViewModel(
 
     override fun onStart() {
         started = true
+        liveViewArea.start(context)
         openPreviewIfReady()
     }
 
     override fun onStop() {
         started = false
+        liveViewArea.stop()
         shot?.cancel()
         shot = null
         session.release()

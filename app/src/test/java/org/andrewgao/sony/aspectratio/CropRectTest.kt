@@ -65,4 +65,31 @@ class CropRectTest {
         val crop = CropRect.aligned(6, 6, AspectRatio(1, 1))
         assertEquals(CropRect(0, 0, 6, 6), crop)
     }
+
+    @Test
+    fun squareCenteredInThreeByTwoLiveView() {
+        val area = CropRect(0, 26, 640, 427)
+        val crop = CropRect.centeredIn(area, AspectRatio(1, 1))
+        assertEquals(CropRect(106, 26, 427, 427), crop)
+    }
+
+    @Test
+    fun xpanCenteredInThreeByTwoLiveView() {
+        val area = CropRect(0, 26, 640, 427)
+        val crop = CropRect.centeredIn(area, AspectRatio(65, 24))
+        assertEquals(CropRect(0, 121, 640, 236), crop)
+    }
+
+    @Test
+    fun centeredInWholeScreenMatchesCentered() {
+        val w = 640
+        val h = 480
+        val area = CropRect(0, 0, w, h)
+        for (aspect in AspectRatio.RATIOS) {
+            assertEquals(
+                CropRect.centered(w, h, aspect),
+                CropRect.centeredIn(area, aspect),
+            )
+        }
+    }
 }

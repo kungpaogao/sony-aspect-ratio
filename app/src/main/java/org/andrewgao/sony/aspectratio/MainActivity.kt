@@ -155,6 +155,7 @@ class MainActivity : Activity() {
 
     private fun render(state: ShootingState) {
         overlay.setAspect(state.aspect)
+        overlay.setLiveView(state.liveView)
         logView.text = state.message
 
         showIcon(modeIcon, NativeIcons.modeDrawable(resources, state.exposureMode), modeText)
