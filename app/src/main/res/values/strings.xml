@@ -1,12 +1,5 @@
 <resources>
     <string name="app_name">Aspect ratio</string>
-    <string name="crop_ratio">65:24 crop</string>
-    <string name="lens_waiting">Lens info…</string>
-    <string name="lens_missing">No lens reported</string>
-    <string name="camera_unavailable">Camera unavailable</string>
-    <string name="saving">Saving…</string>
-    <string name="saved">Saved</string>
-    <string name="save_failed">Save failed</string>
     <string name="debug_ok">A  OK</string>
     <string name="debug_minus">S  −</string>
     <string name="debug_plus">D  +</string>

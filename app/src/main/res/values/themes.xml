@@ -1,8 +1,5 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Base.Theme.AspectRatio" parent="@android:style/Theme.NoTitleBar.Fullscreen">
+    <style name="Theme.AspectRatio" parent="@android:style/Theme.NoTitleBar.Fullscreen">
         <item name="android:windowBackground">@android:color/black</item>
     </style>
-
-    <style name="Theme.AspectRatio" parent="Base.Theme.AspectRatio" />
 </resources>
