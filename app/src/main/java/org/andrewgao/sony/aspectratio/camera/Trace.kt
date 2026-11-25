@@ -13,7 +13,11 @@ object Trace {
     fun line(message: String) {
         Log.i(TAG, message)
         try {
-            FileOutputStream(file, true).use { it.write((System.currentTimeMillis().toString() + " " + message + "\n").toByteArray()) }
+            FileOutputStream(file, true).use {
+                it.write(
+                    (System.currentTimeMillis().toString() + " " + message + "\n").toByteArray(),
+                )
+            }
         } catch (error: IOException) {
             Log.w(TAG, "ar.txt " + error.message)
         }

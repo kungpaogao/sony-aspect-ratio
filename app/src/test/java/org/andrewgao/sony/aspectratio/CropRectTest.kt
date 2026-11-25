@@ -54,7 +54,10 @@ class CropRectTest {
 
     @Test
     fun threeByTwoKeepsTheNativeFrame() {
-        assertEquals(CropRect(0, 0, width, height), CropRect.aligned(width, height, AspectRatio(3, 2)))
+        assertEquals(
+            CropRect(0, 0, width, height),
+            CropRect.aligned(width, height, AspectRatio(3, 2)),
+        )
     }
 
     @Test

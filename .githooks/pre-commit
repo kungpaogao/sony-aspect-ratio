@@ -1,0 +1,22 @@
+#!/bin/sh
+# Formats staged Kotlin files with ktfmt and restages them. Style comes from .editorconfig.
+# Enable once per clone: git config core.hooksPath .githooks
+IFS='
+'
+files=$(git diff --cached --name-only --diff-filter=ACMR -- '*.kt' '*.kts')
+[ -z "$files" ] && exit 0
+
+if ! command -v ktfmt >/dev/null; then
+  echo "pre-commit: ktfmt not found (brew install ktfmt)" >&2
+  exit 1
+fi
+
+# Restaging a partly staged file would pull its unstaged edits into the commit.
+partial=$(git diff --name-only -- $files)
+if [ -n "$partial" ]; then
+  echo "pre-commit: stage or stash the rest of these first:" >&2
+  echo "$partial" >&2
+  exit 1
+fi
+
+ktfmt --kotlinlang-style --enable-editorconfig $files && git add -- $files
