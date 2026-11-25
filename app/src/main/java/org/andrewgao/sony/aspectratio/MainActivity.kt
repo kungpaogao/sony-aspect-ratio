@@ -3,6 +3,8 @@ package org.andrewgao.sony.aspectratio
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.KeyEvent
@@ -15,6 +17,7 @@ import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
 import com.github.ma1co.openmemories.framework.DeviceInfo
 import org.andrewgao.sony.aspectratio.shared.StateBinding
+import org.andrewgao.sony.aspectratio.shooting.Focus
 import org.andrewgao.sony.aspectratio.shooting.ShootingState
 import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
@@ -39,6 +42,8 @@ class MainActivity : Activity() {
     private lateinit var isoIcon: ImageView
     private lateinit var isoLabel: TextView
     private lateinit var isoValue: TextView
+    private lateinit var focusIcon: ImageView
+    private lateinit var focusIndicator: TextView
     private var leaving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +65,8 @@ class MainActivity : Activity() {
         isoIcon = findViewById(R.id.iso_icon) as ImageView
         isoLabel = findViewById(R.id.iso_label) as TextView
         isoValue = findViewById(R.id.iso_value) as TextView
+        focusIcon = findViewById(R.id.focus_icon) as ImageView
+        focusIndicator = findViewById(R.id.focus_indicator) as TextView
         viewModel =
             ShootingViewModel(
                 applicationContext,
@@ -128,6 +135,13 @@ class MainActivity : Activity() {
         return super.onKeyDown(keyCode, event)
     }
 
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        if (event.repeatCount != 0) return super.onKeyUp(keyCode, event)
+        val mapped = emulatorKey(keyCode) ?: CameraKeys.fromKeyEvent(event)
+        if (viewModel.onKeyUp(mapped)) return true
+        return super.onKeyUp(keyCode, event)
+    }
+
     private fun showDebugKeys() {
         val bar = findViewById(R.id.debug_keys) as View
         bar.visibility = View.VISIBLE
@@ -149,6 +163,7 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_A -> CameraKeys.ENTER
             KeyEvent.KEYCODE_S -> CameraKeys.DIAL_1_COUNTERCLOCKWISE
             KeyEvent.KEYCODE_D -> CameraKeys.DIAL_1_CLOCKWISE
+            KeyEvent.KEYCODE_F -> CameraKeys.AEL
             else -> null
         }
     }
@@ -174,6 +189,32 @@ class MainActivity : Activity() {
         exposureText.text = state.exposure
         showIcon(isoIcon, NativeIcons.drawable(resources, NativeIcons.ISO_LABEL), isoLabel)
         isoValue.text = " ${state.iso}"
+
+        renderFocus(state.focus)
+    }
+
+    private fun renderFocus(focus: Focus) {
+        if (focus == Focus.IDLE) {
+            focusIcon.visibility = View.GONE
+            focusIndicator.visibility = View.GONE
+            return
+        }
+        val color =
+            when (focus) {
+                Focus.FOCUSING -> Color.WHITE
+                Focus.LOCKED -> 0xFF33DD33.toInt()
+                Focus.FAILED -> 0xFFFF4444.toInt()
+                else -> Color.WHITE
+            }
+        val dot = NativeIcons.drawable(resources, NativeIcons.AF_DOT)
+        if (dot != null) {
+            showIcon(focusIcon, dot, focusIndicator)
+            focusIcon.setColorFilter(PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN))
+        } else {
+            focusIcon.visibility = View.GONE
+            focusIndicator.visibility = View.VISIBLE
+            focusIndicator.setTextColor(color)
+        }
     }
 
     /** Shows the camera's own [drawable] in [icon] when there is one, else the text [fallback]. */

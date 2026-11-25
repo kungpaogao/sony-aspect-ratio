@@ -61,6 +61,9 @@ class ShootingViewModel(
                 setState { it.copy(shots = ExposureFormat.shots(count)) }
             }
         }
+        scope.launch {
+            session.controls.focus.collect { focus -> setState { it.copy(focus = focus) } }
+        }
     }
 
     fun onSurface(surfaceHolder: SurfaceHolder?) {
@@ -87,10 +90,15 @@ class ShootingViewModel(
         deviceStatus.stop()
         shot?.cancel()
         shot = null
+        // release() detaches the controls, which cancels any focus in progress.
         session.release()
     }
 
     fun onKeyDown(key: Int): Boolean {
+        if (key == CameraKeys.AEL || key == CameraKeys.AF_MF) {
+            session.controls.focus()
+            return true
+        }
         if (key == CameraKeys.ENTER) {
             setState { it.copy(choosingRatio = !it.choosingRatio) }
             return true
@@ -100,6 +108,14 @@ class ShootingViewModel(
             setState {
                 it.copy(aspect = AspectRatio.step(it.aspect, dial))
             }
+            return true
+        }
+        return false
+    }
+
+    fun onKeyUp(key: Int): Boolean {
+        if (key == CameraKeys.AEL || key == CameraKeys.AF_MF) {
+            session.controls.cancelFocus()
             return true
         }
         return false

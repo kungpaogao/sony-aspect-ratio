@@ -3,6 +3,7 @@ package org.andrewgao.sony.aspectratio.camera
 import com.github.ma1co.openmemories.framework.Camera
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.andrewgao.sony.aspectratio.shooting.Focus
 
 data class Exposure(
     val sceneMode: String? = null,
@@ -19,6 +20,9 @@ class ShootingControls {
     private val mutableExposure = MutableStateFlow(Exposure())
     val exposure: StateFlow<Exposure> = mutableExposure
 
+    private val mutableFocus = MutableStateFlow(Focus.IDLE)
+    val focus: StateFlow<Focus> = mutableFocus
+
     private var camera: Camera? = null
     private val loggedFailures = mutableSetOf<String>()
 
@@ -33,6 +37,13 @@ class ShootingControls {
         active.setApertureListener { ap ->
             mutableExposure.value = mutableExposure.value.copy(apertureX100 = ap)
         }
+        active.setAutoFocusListener { success ->
+            Trace.line("focus result success=$success")
+            // A result that arrives after AEL was released must not bring the indicator back.
+            if (mutableFocus.value == Focus.FOCUSING) {
+                mutableFocus.value = if (success) Focus.LOCKED else Focus.FAILED
+            }
+        }
         val e = mutableExposure.value
         Trace.line(
             "exposure mode=${e.sceneMode} ${e.shutterNumerator}/${e.shutterDenominator} " +
@@ -41,10 +52,36 @@ class ShootingControls {
     }
 
     fun detach() {
+        cancelFocus()
         camera?.setShutterSpeedListener(null)
         camera?.setApertureListener(null)
+        camera?.setAutoFocusListener(null)
         camera = null
         loggedFailures.clear()
+    }
+
+    fun focus() {
+        val active = camera ?: return
+        try {
+            Trace.line("focus press")
+            mutableFocus.value = Focus.FOCUSING
+            active.autoFocus()
+        } catch (error: Exception) {
+            Trace.line("focus " + error.message)
+            mutableFocus.value = Focus.FAILED
+        }
+    }
+
+    fun cancelFocus() {
+        if (mutableFocus.value == Focus.IDLE) return
+        val active = camera
+        try {
+            Trace.line("focus release")
+            active?.cancelAutoFocus()
+        } catch (error: Exception) {
+            Trace.line("focus cancel " + error.message)
+        }
+        mutableFocus.value = Focus.IDLE
     }
 
     /** Re-reads every value from the camera parameters. */
