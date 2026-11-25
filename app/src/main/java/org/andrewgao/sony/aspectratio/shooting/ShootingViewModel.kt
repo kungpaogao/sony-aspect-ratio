@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.andrewgao.sony.aspectratio.AspectRatio
 import org.andrewgao.sony.aspectratio.camera.CropSession
+import org.andrewgao.sony.aspectratio.camera.DeviceStatus
 import org.andrewgao.sony.aspectratio.camera.LiveViewArea
 import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.shared.ViewModel
@@ -19,6 +20,7 @@ class ShootingViewModel(
 ) : ViewModel<ShootingState>(ShootingState(message = initialMessage)) {
     private val session = CropSession.create(recreateSurface = recreateSurface, onStatus = ::status)
     private val liveViewArea = LiveViewArea()
+    private val deviceStatus = DeviceStatus()
     private var shot: Job? = null
     private var holder: SurfaceHolder? = null
     private var started = false
@@ -27,6 +29,37 @@ class ShootingViewModel(
         if (initialMessage.isNotEmpty()) Trace.line(initialMessage)
         scope.launch {
             liveViewArea.area.collect { area -> setState { it.copy(liveView = area) } }
+        }
+        scope.launch {
+            session.controls.exposure.collect { exp ->
+                setState {
+                    val mode = ExposureMode.fromSceneMode(exp.sceneMode)
+                    it.copy(
+                        mode = mode.label,
+                        exposureMode = mode,
+                        shutter =
+                            ExposureFormat.shutter(exp.shutterNumerator, exp.shutterDenominator),
+                        aperture = ExposureFormat.aperture(exp.apertureX100),
+                        exposure = ExposureFormat.exposure(exp.evIndex, exp.evStep),
+                        iso = ExposureFormat.iso(exp.iso),
+                    )
+                }
+            }
+        }
+        scope.launch {
+            deviceStatus.battery.collect { percent ->
+                setState {
+                    it.copy(
+                        battery = ExposureFormat.battery(percent),
+                        batteryLevel = ExposureFormat.batteryLevel(percent),
+                    )
+                }
+            }
+        }
+        scope.launch {
+            deviceStatus.shots.collect { count ->
+                setState { it.copy(shots = ExposureFormat.shots(count)) }
+            }
         }
     }
 
@@ -44,12 +77,14 @@ class ShootingViewModel(
     override fun onStart() {
         started = true
         liveViewArea.start(context)
+        deviceStatus.start(context)
         openPreviewIfReady()
     }
 
     override fun onStop() {
         started = false
         liveViewArea.stop()
+        deviceStatus.stop()
         shot?.cancel()
         shot = null
         session.release()

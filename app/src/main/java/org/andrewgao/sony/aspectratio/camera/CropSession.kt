@@ -23,9 +23,11 @@ import org.andrewgao.sony.aspectratio.CropRect
  */
 abstract class CropSession(private val onStatus: (String) -> Unit) {
     private var camera: Camera? = null
+    val controls = ShootingControls()
 
     fun open(holder: SurfaceHolder) {
         try {
+            val newlyOpened = camera == null
             val active =
                 camera
                     ?: Camera.open(
@@ -37,6 +39,7 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
                         .also { camera = it }
             active.setPreviewDisplay(holder)
             startPreview(active)
+            if (newlyOpened) controls.attach(active)
         } catch (error: Exception) {
             onStatus("camera " + describe(error))
             release()
@@ -63,6 +66,7 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
     fun release() {
         val active = camera ?: return
         camera = null
+        controls.detach()
         try {
             active.stopPreview()
         } catch (error: Exception) {
