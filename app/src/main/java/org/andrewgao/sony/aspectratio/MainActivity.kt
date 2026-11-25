@@ -11,27 +11,18 @@ import android.widget.Button
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
 import com.github.ma1co.openmemories.framework.DeviceInfo
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import org.andrewgao.sony.aspectratio.camera.CropSession
-import org.andrewgao.sony.aspectratio.camera.Trace
+import org.andrewgao.sony.aspectratio.shared.StateBinding
+import org.andrewgao.sony.aspectratio.shooting.ShootingState
+import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
 
 class MainActivity : Activity() {
-    private val scope = MainScope()
-    private var shot: Job? = null
-    private val session =
-        CropSession.create(recreateSurface = { recreateSurface() }, onStatus = { log(it) })
+    private lateinit var viewModel: ShootingViewModel
+    private lateinit var binding: StateBinding<ShootingState>
     private lateinit var surface: SurfaceView
     private lateinit var overlay: CropOverlayView
     private lateinit var logView: TextView
-    private var holder: SurfaceHolder? = null
-    private var resumed = false
     private var leaving = false
-    private var choosingRatio = false
-    private var aspect = AspectRatio.DEFAULT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,13 +30,19 @@ class MainActivity : Activity() {
         surface = findViewById(R.id.preview_surface) as SurfaceView
         overlay = findViewById(R.id.crop_overlay) as CropOverlayView
         logView = findViewById(R.id.log) as TextView
+        viewModel =
+            ShootingViewModel(
+                applicationContext,
+                ::recreateSurface,
+                "build ${BuildConfig.BUILD_TIME}",
+            )
+        binding = StateBinding(viewModel.state, ::render)
         // Required on API 10, which is what the camera emulator runs.
         @Suppress("DEPRECATION") surface.holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
         surface.holder.addCallback(
             object : SurfaceHolder.Callback {
                 override fun surfaceCreated(surfaceHolder: SurfaceHolder) {
-                    holder = surfaceHolder
-                    startPreview()
+                    viewModel.onSurface(surfaceHolder)
                 }
 
                 override fun surfaceChanged(
@@ -54,34 +51,31 @@ class MainActivity : Activity() {
                     width: Int,
                     height: Int,
                 ) {
-                    holder = surfaceHolder
-                    startPreview()
+                    viewModel.onSurface(surfaceHolder)
                 }
 
                 override fun surfaceDestroyed(surfaceHolder: SurfaceHolder) {
-                    if (holder == surfaceHolder) holder = null
+                    viewModel.clearSurface(surfaceHolder)
                 }
             },
         )
         if (!DeviceInfo.getInstance().isCamera) showDebugKeys()
-        log("build ${BuildConfig.BUILD_TIME}")
     }
 
     override fun onResume() {
         super.onResume()
-        resumed = true
-        startPreview()
+        viewModel.onStart()
+        binding.start()
     }
 
     override fun onPause() {
-        resumed = false
-        shot?.cancel()
-        session.release()
+        binding.stop()
+        viewModel.onStop()
         super.onPause()
     }
 
     override fun onDestroy() {
-        scope.cancel()
+        viewModel.clear()
         super.onDestroy()
     }
 
@@ -96,7 +90,7 @@ class MainActivity : Activity() {
             leave()
             return true
         }
-        if (handleControl(mapped)) return true
+        if (viewModel.onKeyDown(mapped)) return true
         if (mapped == CameraKeys.SHUTTER || keyCode == KeyEvent.KEYCODE_CAMERA) {
             shoot()
             return true
@@ -108,13 +102,13 @@ class MainActivity : Activity() {
         val bar = findViewById(R.id.debug_keys) as View
         bar.visibility = View.VISIBLE
         (findViewById(R.id.debug_ok) as Button).setOnClickListener {
-            handleControl(CameraKeys.ENTER)
+            viewModel.onKeyDown(CameraKeys.ENTER)
         }
         (findViewById(R.id.debug_minus) as Button).setOnClickListener {
-            handleControl(CameraKeys.DIAL_1_COUNTERCLOCKWISE)
+            viewModel.onKeyDown(CameraKeys.DIAL_1_COUNTERCLOCKWISE)
         }
         (findViewById(R.id.debug_plus) as Button).setOnClickListener {
-            handleControl(CameraKeys.DIAL_1_CLOCKWISE)
+            viewModel.onKeyDown(CameraKeys.DIAL_1_CLOCKWISE)
         }
         (findViewById(R.id.debug_shutter) as Button).setOnClickListener { shoot() }
     }
@@ -129,34 +123,9 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun handleControl(mapped: Int): Boolean {
-        if (mapped == CameraKeys.ENTER) {
-            choosingRatio = !choosingRatio
-            showAspect()
-            return true
-        }
-        val dial = if (choosingRatio) dialStep(mapped) else 0
-        if (dial != 0) {
-            aspect = AspectRatio.step(aspect, dial)
-            showAspect()
-            return true
-        }
-        return false
-    }
-
-    private fun dialStep(key: Int): Int =
-        when (key) {
-            CameraKeys.DIAL_1_CLOCKWISE,
-            CameraKeys.DIAL_2_CLOCKWISE,
-            CameraKeys.RING_CLOCKWISE -> 1
-            CameraKeys.DIAL_1_COUNTERCLOCKWISE,
-            CameraKeys.DIAL_2_COUNTERCLOCKWISE,
-            CameraKeys.RING_COUNTERCLOCKWISE -> -1
-            else -> 0
-        }
-
-    private fun showAspect() {
-        overlay.setAspect(aspect, choosingRatio)
+    private fun render(state: ShootingState) {
+        overlay.setAspect(state.aspect, state.choosingRatio)
+        logView.text = state.message
     }
 
     private fun leave() {
@@ -170,12 +139,6 @@ class MainActivity : Activity() {
         )
     }
 
-    private fun startPreview() {
-        val surfaceHolder = holder ?: return
-        if (!resumed) return
-        session.open(surfaceHolder)
-    }
-
     /**
      * GONE then VISIBLE destroys and recreates the surface; the new surface's callbacks reopen the
      * camera.
@@ -186,13 +149,7 @@ class MainActivity : Activity() {
     }
 
     private fun shoot() {
-        if (shot?.isActive == true || leaving) return
-        log("shutter " + aspect.label)
-        shot = scope.launch { log(session.takePicture(applicationContext, aspect)) }
-    }
-
-    private fun log(message: String) {
-        Trace.line(message)
-        logView.text = message
+        if (leaving) return
+        viewModel.shoot()
     }
 }
