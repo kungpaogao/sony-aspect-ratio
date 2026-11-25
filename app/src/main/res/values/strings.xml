@@ -1,8 +1,4 @@
 <resources>
     <string name="app_name">Aspect ratio</string>
-    <string name="debug_ok">A  OK</string>
-    <string name="debug_minus">S  −</string>
-    <string name="debug_plus">D  +</string>
-    <string name="debug_shutter">Shutter</string>
     <string name="iso_label">ISO</string>
 </resources>

@@ -11,7 +11,6 @@ import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
@@ -97,7 +96,6 @@ class MainActivity : Activity() {
                 }
             },
         )
-        if (!DeviceInfo.getInstance().isCamera) showDebugKeys()
     }
 
     override fun onResume() {
@@ -143,21 +141,6 @@ class MainActivity : Activity() {
         val mapped = emulatorKey(keyCode) ?: CameraKeys.fromKeyEvent(event)
         if (viewModel.onKeyUp(mapped)) return true
         return super.onKeyUp(keyCode, event)
-    }
-
-    private fun showDebugKeys() {
-        val bar = findViewById(R.id.debug_keys) as View
-        bar.visibility = View.VISIBLE
-        (findViewById(R.id.debug_ok) as Button).setOnClickListener {
-            viewModel.onKeyDown(CameraKeys.ENTER)
-        }
-        (findViewById(R.id.debug_minus) as Button).setOnClickListener {
-            viewModel.onKeyDown(CameraKeys.DIAL_1_COUNTERCLOCKWISE)
-        }
-        (findViewById(R.id.debug_plus) as Button).setOnClickListener {
-            viewModel.onKeyDown(CameraKeys.DIAL_1_CLOCKWISE)
-        }
-        (findViewById(R.id.debug_shutter) as Button).setOnClickListener { shoot() }
     }
 
     private fun emulatorKey(keyCode: Int): Int? {
