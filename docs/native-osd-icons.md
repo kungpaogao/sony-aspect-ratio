@@ -5,8 +5,9 @@ Sony's PlayMemories apps. They are **system resources**: they live in the camera
 (package `0x01`), and every Sony app points at them by integer ID. `ui/NativeIcons.kt` loads them the same
 way, on the camera only.
 
-None of these IDs has been checked on the a7R yet. If one doesn't resolve, the view shows its text
-fallback.
+Checked on the ILCE-7R (2026-11-25): every ID below resolves to a `BitmapDrawable` of the listed size,
+except "battery charging", which is some other 310x80 graphic. If an ID doesn't resolve on another body,
+the view shows its text fallback.
 
 ## How they were found
 
@@ -34,23 +35,30 @@ fallback.
 
 | Icon | ID | Native size (px) |
 |---|---|---|
-| Exposure mode P | `0x010803a1` | 32x25 |
-| Exposure mode A | `0x010803a5` | 32x25 |
-| Exposure mode S | `0x010803a9` | 32x25 |
-| Exposure mode M | `0x010803ad` | 32x25 |
-| Intelligent auto | `0x010804d5` | 32x25 |
+| Exposure mode P | `0x010803a1` | 70x55 |
+| Exposure mode A | `0x010803a5` | 70x55 |
+| Exposure mode S | `0x010803a9` | 70x55 |
+| Exposure mode M | `0x010803ad` | 70x55 |
+| Intelligent auto | `0x010804d5` | 70x55 |
 | Battery level 0 to 4 | `0x01080d4e`, `0x01080509`, `0x01080ca2`, `0x01080335`, `0x01080b0a` | 49x32 |
-| Battery charging | `0x0108057b` | 49x32 |
+| ~~Battery charging~~ | `0x0108057b` | 310x80, not a battery icon on the a7R |
 | Memory card | `0x01080d7f` | 44x32 |
-| No card | `0x01080682` | 44x32 |
+| No card (orange "NO CARD") | `0x01080682` | 100x32 |
 | ISO label | `0x0108050b` | 48x34 |
 | Exposure compensation mark | `0x010810fc` | 36x34 |
-| AF dot (round / arc) | `0x01080e84` / `0x01080e85` | 44x40 |
-| AEL | `0x01080fe3` | 42x40 |
+| AF locked dot (green) / AF-C arcs (green) | `0x01080e84` / `0x01080e85` | 44x40 |
+| AE lock (asterisk) | `0x01080fe3` | 42x40 |
 | Still aspect 3:2, 16:9, 4:3, 1:1 | `0x01081020`, `0x01080974`, `0x0108129d`, `0x01081242` | 47x32 |
 
 Battery level thresholds come from `ScalarProperties.getIntArray("ui.battery.threshold.list")`, default
 `{80, 50, 20}`: level 4 above 80%, 3 above 50%, 2 above 20%, 1 above 0, else 0.
+
+## Getting the bitmaps off the camera
+
+There's no framebuffer access over adb on the a7R, but an app can draw each drawable to a `Bitmap` and save
+it as a PNG. Two gotchas: the SD card only accepts 8.3 file names (`osd01.png`, not `osd-mode_p.png`; a
+folder named `osd-icons` can't be created either), and the PNGs are Sony's artwork, so they stay out of
+this repo.
 
 ## Off the camera
 
