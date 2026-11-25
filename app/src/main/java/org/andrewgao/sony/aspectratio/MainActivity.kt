@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
 import com.github.ma1co.openmemories.framework.DeviceInfo
+import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.shared.StateBinding
 import org.andrewgao.sony.aspectratio.shooting.Focus
 import org.andrewgao.sony.aspectratio.shooting.ShootingState
@@ -132,6 +133,8 @@ class MainActivity : Activity() {
             shoot()
             return true
         }
+        // Logged so a camera run shows what unmapped buttons (like AEL on the a7R) actually send.
+        Trace.line("key $keyCode scan ${event.scanCode} unhandled")
         return super.onKeyDown(keyCode, event)
     }
 

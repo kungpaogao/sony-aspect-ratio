@@ -95,7 +95,7 @@ class ShootingViewModel(
     }
 
     fun onKeyDown(key: Int): Boolean {
-        if (key == CameraKeys.AEL || key == CameraKeys.AF_MF) {
+        if (isFocusKey(key)) {
             session.controls.focus()
             return true
         }
@@ -129,8 +129,15 @@ class ShootingViewModel(
         return false
     }
 
+    /**
+     * Half-press focuses, and full press shoots with that focus. AEL (532, or 533 with the lever on
+     * AF/MF) never reached the app on the a7R, so it stays only in case another body sends it.
+     */
+    private fun isFocusKey(key: Int): Boolean =
+        key == CameraKeys.SHUTTER_HALF || key == CameraKeys.AEL || key == CameraKeys.AF_MF
+
     fun onKeyUp(key: Int): Boolean {
-        if (key == CameraKeys.AEL || key == CameraKeys.AF_MF) {
+        if (isFocusKey(key)) {
             session.controls.cancelFocus()
             return true
         }
