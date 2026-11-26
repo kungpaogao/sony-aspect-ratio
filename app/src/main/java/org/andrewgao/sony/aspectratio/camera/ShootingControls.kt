@@ -2,11 +2,13 @@ package org.andrewgao.sony.aspectratio.camera
 
 import com.github.ma1co.openmemories.framework.Camera
 import com.github.ma1co.openmemories.framework.CameraKeys
+import com.github.ma1co.openmemories.framework.CameraParameters
 import kotlin.math.abs
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.andrewgao.sony.aspectratio.shooting.DialAction
 import org.andrewgao.sony.aspectratio.shooting.Focus
+import org.andrewgao.sony.aspectratio.shooting.FocusMode
 
 data class Exposure(
     val sceneMode: String? = null,
@@ -33,6 +35,9 @@ class ShootingControls {
 
     private val mutableFocus = MutableStateFlow(Focus.IDLE)
     val focus: StateFlow<Focus> = mutableFocus
+
+    private val mutableFocusMode = MutableStateFlow(FocusMode.UNKNOWN)
+    val focusMode: StateFlow<FocusMode> = mutableFocusMode
 
     private var camera: Camera? = null
     private val loggedFailures = mutableSetOf<String>()
@@ -69,6 +74,7 @@ class ShootingControls {
         camera?.setApertureListener(null)
         camera?.setAutoFocusListener(null)
         camera = null
+        mutableFocusMode.value = FocusMode.UNKNOWN
         loggedFailures.clear()
     }
 
@@ -170,6 +176,23 @@ class ShootingControls {
                 evStep = read("evStep", 0f) { params.exposureCompensationStep },
                 iso = read("iso", 0) { params.iso },
             )
+        refreshFocusMode(params)
+    }
+
+    private fun refreshFocusMode(params: CameraParameters) {
+        val raw = read("focusMode", null) { params.focusMode }
+        // Like Sony's apps, read the AF mode only when the focus mode is auto.
+        val rawAuto =
+            if (raw == CameraParameters.FOCUS_AUTO) {
+                read("autoFocusMode", null) { params.autoFocusMode }
+            } else {
+                null
+            }
+        val mode = FocusMode.from(raw, rawAuto)
+        if (mode != mutableFocusMode.value) {
+            Trace.line("focus mode $raw/$rawAuto -> $mode")
+            mutableFocusMode.value = mode
+        }
     }
 
     /**

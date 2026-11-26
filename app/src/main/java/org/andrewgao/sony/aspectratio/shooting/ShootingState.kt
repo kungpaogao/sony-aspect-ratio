@@ -16,6 +16,7 @@ data class ShootingState(
     val shots: String = "--",
     val battery: String = "--",
     val focus: Focus = Focus.IDLE,
+    val focusMode: FocusMode = FocusMode.UNKNOWN,
     val exposureMode: ExposureMode = ExposureMode.UNKNOWN,
     val batteryLevel: Int = -1,
     val liveView: CropRect? = null,

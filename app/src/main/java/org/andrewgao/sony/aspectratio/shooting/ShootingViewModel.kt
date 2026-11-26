@@ -64,6 +64,9 @@ class ShootingViewModel(
         scope.launch {
             session.controls.focus.collect { focus -> setState { copy(focus = focus) } }
         }
+        scope.launch {
+            session.controls.focusMode.collect { mode -> setState { copy(focusMode = mode) } }
+        }
     }
 
     fun onSurface(surfaceHolder: SurfaceHolder?) {
