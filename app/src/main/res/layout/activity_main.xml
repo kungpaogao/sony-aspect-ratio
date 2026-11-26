@@ -284,20 +284,28 @@
         </LinearLayout>
     </FrameLayout>
 
-    <TextView
-        android:id="@+id/processing"
-        style="@style/OsdShadow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@drawable/osd_chip"
-        android:includeFontPadding="false"
-        android:paddingLeft="6px"
-        android:paddingTop="2px"
-        android:paddingRight="6px"
-        android:paddingBottom="2px"
-        android:text="@string/processing"
-        android:textSize="26px"
-        android:visibility="gone" />
+    <!-- Sized to the crop in render(), so the label centers on the crop, not the screen. -->
+    <FrameLayout
+        android:id="@+id/processing_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="top|left">
+
+        <TextView
+            android:id="@+id/processing"
+            style="@style/OsdShadow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/osd_chip"
+            android:includeFontPadding="false"
+            android:paddingLeft="6px"
+            android:paddingTop="2px"
+            android:paddingRight="6px"
+            android:paddingBottom="2px"
+            android:text="@string/processing"
+            android:textSize="26px"
+            android:visibility="gone" />
+    </FrameLayout>
 
 </FrameLayout>

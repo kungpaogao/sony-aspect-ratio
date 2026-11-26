@@ -11,6 +11,7 @@ import android.view.KeyEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
@@ -33,6 +34,7 @@ class MainActivity : Activity() {
     private lateinit var binding: StateBinding<ShootingState>
     private lateinit var surface: SurfaceView
     private lateinit var overlay: CropOverlayView
+    private lateinit var processingFrame: View
     private lateinit var processingText: TextView
     private lateinit var modeIcon: ImageView
     private lateinit var modeText: TextView
@@ -63,6 +65,7 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
         surface = findViewById(R.id.preview_surface) as SurfaceView
         overlay = findViewById(R.id.crop_overlay) as CropOverlayView
+        processingFrame = findViewById(R.id.processing_frame)
         processingText = findViewById(R.id.processing) as TextView
         modeIcon = findViewById(R.id.mode_icon) as ImageView
         modeText = findViewById(R.id.mode_text) as TextView
@@ -209,6 +212,7 @@ class MainActivity : Activity() {
         overlay.setLiveView(state.liveView)
         overlay.setFocusLocked(state.focus == Focus.LOCKED)
         processingText.visibility = if (state.shooting) View.VISIBLE else View.GONE
+        fitToCrop(processingFrame, state)
 
         showIcon(modeIcon, NativeIcons.modeDrawable(resources, state.exposureMode), modeText)
         modeText.text = state.mode
@@ -255,6 +259,29 @@ class MainActivity : Activity() {
         modeText.visibility = View.GONE
         focusModeIcon.visibility = View.GONE
         focusModeText.visibility = View.GONE
+    }
+
+    /**
+     * Sizes [frame] to the crop the overlay draws, so what it centers sits in the middle of the
+     * crop. Until the live view area is known it keeps filling the screen.
+     */
+    private fun fitToCrop(frame: View, state: ShootingState) {
+        val liveView = state.liveView ?: return
+        val crop = CropRect.centeredIn(liveView, state.aspect)
+        val params = frame.layoutParams as FrameLayout.LayoutParams
+        if (
+            params.leftMargin == crop.left &&
+                params.topMargin == crop.top &&
+                params.width == crop.width &&
+                params.height == crop.height
+        ) {
+            return
+        }
+        params.leftMargin = crop.left
+        params.topMargin = crop.top
+        params.width = crop.width
+        params.height = crop.height
+        frame.layoutParams = params
     }
 
     private fun renderFocusMode(mode: FocusMode) {
