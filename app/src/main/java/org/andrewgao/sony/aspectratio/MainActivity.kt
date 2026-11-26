@@ -183,6 +183,7 @@ class MainActivity : Activity() {
             KeyEvent.KEYCODE_S -> CameraKeys.DIAL_1_COUNTERCLOCKWISE
             KeyEvent.KEYCODE_D -> CameraKeys.DIAL_1_CLOCKWISE
             KeyEvent.KEYCODE_F -> CameraKeys.AEL
+            KeyEvent.KEYCODE_G -> CameraKeys.AF_MF
             KeyEvent.KEYCODE_W -> CameraKeys.WHEEL_COUNTERCLOCKWISE
             KeyEvent.KEYCODE_E -> CameraKeys.WHEEL_CLOCKWISE
             else -> null

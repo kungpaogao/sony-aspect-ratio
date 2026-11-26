@@ -25,6 +25,12 @@ class ShootingViewModel(
     private var holder: SurfaceHolder? = null
     private var started = false
 
+    /**
+     * What the AF/MF/AEL button's current press does, chosen on key down. Back-button focus: AEL
+     * holds focus and the shutter shoots with it; half-press does nothing.
+     */
+    private var pressedButton: FocusButton? = null
+
     init {
         scope.launch {
             liveViewArea.area.collect { area -> setState { copy(liveView = area) } }
@@ -97,8 +103,19 @@ class ShootingViewModel(
     }
 
     fun onKeyDown(key: Int): Boolean {
-        if (isFocusKey(key)) {
-            session.controls.focus()
+        if (key == CameraKeys.SLIDE_AEL_FOCUS) {
+            Trace.line("lever " + CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS))
+            return true
+        }
+        val lever = CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS)
+        val button = focusButton(key, lever)
+        if (button != null) {
+            Trace.line("focus button $key lever=$lever -> $button")
+            pressedButton = button
+            when (button) {
+                FocusButton.AUTOFOCUS -> session.controls.focus()
+                FocusButton.MAGNIFY -> {}
+            }
             return true
         }
         if (key == CameraKeys.ENTER) {
@@ -131,20 +148,16 @@ class ShootingViewModel(
         return false
     }
 
-    /**
-     * Back-button focus: the AEL button holds focus and the shutter shoots with it; half-press does
-     * nothing. The a7R's AEL button arrives as 638 (AF_MF_AEL); 532 and 533 cover the other lever
-     * positions.
-     */
-    private fun isFocusKey(key: Int): Boolean =
-        key == CameraKeys.AF_MF_AEL || key == CameraKeys.AEL || key == CameraKeys.AF_MF
-
     fun onKeyUp(key: Int): Boolean {
-        if (isFocusKey(key)) {
+        if (key == CameraKeys.SLIDE_AEL_FOCUS) return true
+        if (focusButton(key, 0) == null) return false
+        // Use what the press chose, so up matches down even if the lever moved while it was held.
+        val button = pressedButton
+        pressedButton = null
+        if (button == FocusButton.AUTOFOCUS) {
             session.controls.cancelFocus()
-            return true
         }
-        return false
+        return true
     }
 
     fun shoot() {
