@@ -22,6 +22,7 @@ import org.andrewgao.sony.aspectratio.shooting.ShootingState
 import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
 import org.andrewgao.sony.aspectratio.ui.NativeIcons
+import org.andrewgao.sony.aspectratio.ui.OsdTypeface
 
 class MainActivity : Activity() {
     private lateinit var viewModel: ShootingViewModel
@@ -67,6 +68,25 @@ class MainActivity : Activity() {
         isoValue = findViewById(R.id.iso_value) as TextView
         focusIcon = findViewById(R.id.focus_icon) as ImageView
         focusIndicator = findViewById(R.id.focus_indicator) as TextView
+        Trace.line("typefaces " + OsdTypeface.names().joinToString(","))
+        val metrics = resources.displayMetrics
+        Trace.line(
+            "display ${metrics.widthPixels}x${metrics.heightPixels} density=${metrics.density}",
+        )
+        OsdTypeface.univers?.let { univers ->
+            listOf(
+                    modeText,
+                    aspectChip,
+                    shotsText,
+                    batteryText,
+                    shutterText,
+                    apertureText,
+                    exposureText,
+                    isoLabel,
+                    isoValue,
+                )
+                .forEach { it.typeface = univers }
+        }
         viewModel =
             ShootingViewModel(
                 applicationContext,
