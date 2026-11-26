@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.github.ma1co.openmemories.framework.CameraKeys
 import com.github.ma1co.openmemories.framework.DeviceInfo
+import org.andrewgao.sony.aspectratio.camera.CameraOs
 import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.shared.StateBinding
 import org.andrewgao.sony.aspectratio.shooting.Focus
@@ -149,6 +150,8 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        // Every resume, like Sony's apps: the menu or another app may have registered since.
+        CameraOs.registerStillShootingApp(this)
         viewModel.onStart()
         binding.start()
     }
