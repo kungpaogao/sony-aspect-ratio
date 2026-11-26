@@ -112,7 +112,9 @@ class ShootingViewModel(
             Trace.line("lever " + CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS))
             return true
         }
-        val lever = CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS)
+        // Only the a7R's shared button (638) depends on the lever.
+        val lever =
+            if (key == CameraKeys.AF_MF_AEL) CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS) else 0
         val button = focusButton(key, lever)
         if (button != null) {
             Trace.line("focus button $key lever=$lever -> $button")

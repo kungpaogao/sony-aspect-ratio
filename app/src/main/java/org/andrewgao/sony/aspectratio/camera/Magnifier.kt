@@ -41,16 +41,15 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         loggedFailures.clear()
         val params = read("parameters", null) { active.parameters }
         // Sony lists 0 as "arbitrary"; there is no ratio to show for it.
-        levels =
+        ratios =
             read("magnificationLevels", emptyList<Int>()) {
                     params?.supportedPreviewMagnification ?: emptyList()
                 }
-                .filter {
-                    read("magnificationRatio", 0) { active.getPreviewMagnificationRatio(it) } > 0
+                .associateWith { level ->
+                    read("magnificationRatio", 0) { active.getPreviewMagnificationRatio(level) }
                 }
-        ratios = levels.associateWith { level ->
-            read("magnificationRatio", 0) { active.getPreviewMagnificationRatio(level) }
-        }
+                .filterValues { it > 0 }
+        levels = ratios.keys.toList()
         mfAssist = read("mfAssist", false) { params?.mfAssist ?: false }
         mfAssistSeconds = read("mfAssistSeconds", 0) { params?.mfAssistSeconds ?: 0 }
         grid = MagnifierGrid(ratios.values.minOrNull() ?: 0)
