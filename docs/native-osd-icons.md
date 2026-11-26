@@ -57,16 +57,31 @@ the view shows its text fallback.
 | Focus mode DMF | `0x010808ab` | 70x60 |
 | Focus mode, EVF set (AF-S, AF-C, AF-A, MF, DMF) | `0x01080881`, `0x0108084d`, `0x01080f09`, `0x01080ecf`, `0x01080844` | 58x50 |
 | Still aspect 3:2, 16:9, 4:3, 1:1 | `0x01081020`, `0x01080974`, `0x0108129d`, `0x01081242` | 47x32 |
+| Focus magnifier glyph (`p_focusmagicon`) | `0x0108072c` | 40x36 |
+| Magnifier arrows up, down | `0x01080e0a`, `0x01080e95` | 32x20 |
+| Magnifier arrows left, right | `0x0108106f`, `0x01080355` | 20x32 |
+
+The magnifier IDs come from `layout-notlong/shooting_main_sid_mf_assist_panel.xml` (lightshaft). That screen
+draws its navigator and frame with app colors: background `#88000000`, outline `#DDDDDD`, moving marker
+`#DD5500` (`RESID_LINESTYLE_MF_ASSIST_COLOR_*`).
 
 Battery level thresholds come from `ScalarProperties.getIntArray("ui.battery.threshold.list")`, default
 `{80, 50, 20}`: level 4 above 80%, 3 above 50%, 2 above 20%, 1 above 0, else 0.
 
 ## Getting the bitmaps off the camera
 
-There's no framebuffer access over adb on the a7R, but an app can draw each drawable to a `Bitmap` and save
-it as a PNG. Two gotchas: the SD card only accepts 8.3 file names (`osd01.png`, not `osd-mode_p.png`; a
-folder named `osd-icons` can't be created either), and the PNGs are Sony's artwork, so they stay out of
-this repo.
+The whole set is in the camera's framework resources, which adb can read:
+
+```sh
+adb-camera pull /system/framework/framework-res.apk
+aapt2 dump resources framework-res.apk | grep -A1 'resource 0x0108072c'
+#   resource 0x0108072c drawable/p_focusmagicon PUBLIC
+#     (nodpi-v4) (file) res/drawable-nodpi/p_focusmagicon.png type=PNG
+unzip framework-res.apk 'res/drawable*'
+```
+
+The ILCE-7R's has about 7,000 drawables, with Sony's own names (`p_16_dd_parts_arrow_top`, ...). The PNGs
+are Sony's artwork, so they stay out of this repo; a local copy lives in the gitignored `plans/` folder.
 
 ## Off the camera
 
@@ -78,5 +93,4 @@ On the emulator (stock Android) these IDs either don't exist or point at unrelat
 
 Once the IDs are confirmed on hardware, this fits the framework as a small `OsdIcons` class: the ID
 constants plus `Drawable get(Context, int id)` that returns null off-camera. Apps would then supply their
-own fallback art only for the emulator. A firmware dump of `framework-res.apk` would also let us extract
-the PNGs for emulator use; none is on this machine.
+own fallback art only for the emulator, or load the PNGs extracted from `framework-res.apk`.
