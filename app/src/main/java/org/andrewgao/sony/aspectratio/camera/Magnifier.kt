@@ -196,8 +196,12 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         if (rotating) {
             val manual = mode == FocusMode.MF || mode == FocusMode.DMF
             if (!current.on && mfAssist && manual && levels.isNotEmpty()) {
-                // In DMF the point is where AF focused.
-                if (magnify(levels[0], x, y)) byButton = false
+                // In DMF the point is where AF focused. In MF the a7R reports -1000,-1000 (no
+                // point); like Sony's MF Assist, reuse the last position, which starts centered.
+                val known = x != NO_POSITION || y != NO_POSITION
+                val atX = if (known) x else lastX
+                val atY = if (known) y else lastY
+                if (magnify(levels[0], atX, atY)) byButton = false
             }
         } else if (current.on && !byButton && mfAssistSeconds > 0) {
             handler.postDelayed(stopAfterRing, mfAssistSeconds * 1000L)
@@ -217,4 +221,9 @@ class Magnifier(private val focusMode: () -> FocusMode) {
             }
             fallback
         }
+
+    private companion object {
+        /** What the a7R reports for the focus-ring position when there is none (MF). */
+        const val NO_POSITION = -1000
+    }
 }

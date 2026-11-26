@@ -78,6 +78,7 @@
 
         <ImageView
             android:id="@+id/magnifier_icon"
+            android:layout_gravity="top|left"
             android:layout_width="40px"
             android:layout_height="36px"
             android:layout_marginLeft="2px"
@@ -88,6 +89,7 @@
 
         <TextView
             android:id="@+id/magnifier_text"
+            android:layout_gravity="top|left"
             style="@style/OsdShadow"
             android:layout_width="wrap_content"
             android:layout_height="36px"
