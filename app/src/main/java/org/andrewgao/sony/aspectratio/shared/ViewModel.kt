@@ -15,8 +15,8 @@ abstract class ViewModel<S>(initial: S, protected val scope: CoroutineScope = Ma
     private val mutableState = MutableStateFlow(initial)
     val state: StateFlow<S> = mutableState
 
-    protected fun setState(transform: (S) -> S) {
-        mutableState.value = transform(mutableState.value)
+    protected fun setState(transform: S.() -> S) {
+        mutableState.value = mutableState.value.transform()
     }
 
     /** The view is in front (Activity.onResume). */

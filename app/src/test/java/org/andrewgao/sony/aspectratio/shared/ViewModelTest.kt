@@ -13,7 +13,7 @@ class ViewModelTest {
         var cleared = false
 
         fun bump() {
-            setState { it + 1 }
+            setState { this + 1 }
         }
 
         override fun onCleared() {

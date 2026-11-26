@@ -28,13 +28,13 @@ class ShootingViewModel(
     init {
         if (initialMessage.isNotEmpty()) Trace.line(initialMessage)
         scope.launch {
-            liveViewArea.area.collect { area -> setState { it.copy(liveView = area) } }
+            liveViewArea.area.collect { area -> setState { copy(liveView = area) } }
         }
         scope.launch {
             session.controls.exposure.collect { exp ->
+                val mode = ExposureMode.fromSceneMode(exp.sceneMode)
                 setState {
-                    val mode = ExposureMode.fromSceneMode(exp.sceneMode)
-                    it.copy(
+                    copy(
                         mode = mode.label,
                         exposureMode = mode,
                         shutter =
@@ -49,7 +49,7 @@ class ShootingViewModel(
         scope.launch {
             deviceStatus.battery.collect { percent ->
                 setState {
-                    it.copy(
+                    copy(
                         battery = ExposureFormat.battery(percent),
                         batteryLevel = ExposureFormat.batteryLevel(percent),
                     )
@@ -58,11 +58,11 @@ class ShootingViewModel(
         }
         scope.launch {
             deviceStatus.shots.collect { count ->
-                setState { it.copy(shots = ExposureFormat.shots(count)) }
+                setState { copy(shots = ExposureFormat.shots(count)) }
             }
         }
         scope.launch {
-            session.controls.focus.collect { focus -> setState { it.copy(focus = focus) } }
+            session.controls.focus.collect { focus -> setState { copy(focus = focus) } }
         }
     }
 
@@ -100,14 +100,14 @@ class ShootingViewModel(
             return true
         }
         if (key == CameraKeys.ENTER) {
-            setState { it.copy(choosingRatio = !it.choosingRatio) }
+            setState { copy(choosingRatio = !choosingRatio) }
             return true
         }
         if (state.value.choosingRatio) {
             val dial = dialStep(key)
             if (dial != 0) {
                 setState {
-                    it.copy(aspect = AspectRatio.step(it.aspect, dial))
+                    copy(aspect = AspectRatio.step(aspect, dial))
                 }
                 return true
             }
@@ -150,12 +150,12 @@ class ShootingViewModel(
         val aspect = state.value.aspect
         status("shutter " + aspect.label)
         shot = scope.launch {
-            setState { it.copy(shooting = true) }
+            setState { copy(shooting = true) }
             try {
                 status(session.takePicture(context, aspect))
             } finally {
                 shot = null
-                setState { it.copy(shooting = false) }
+                setState { copy(shooting = false) }
             }
         }
     }
@@ -168,6 +168,6 @@ class ShootingViewModel(
 
     private fun status(message: String) {
         Trace.line(message)
-        setState { it.copy(message = message) }
+        setState { copy(message = message) }
     }
 }
