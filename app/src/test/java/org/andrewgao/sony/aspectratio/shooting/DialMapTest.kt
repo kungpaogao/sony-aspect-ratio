@@ -126,6 +126,14 @@ class DialMapTest {
     }
 
     @Test
+    fun controlWheelDial3ChangesIsoInEveryMode() {
+        for (mode in ExposureMode.values()) {
+            assertEquals(DialAction.Iso(1), dialAction(mode, CameraKeys.DIAL_3_CLOCKWISE))
+            assertEquals(DialAction.Iso(-1), dialAction(mode, CameraKeys.DIAL_3_COUNTERCLOCKWISE))
+        }
+    }
+
+    @Test
     fun unrelatedKeysReturnNull() {
         assertNull(dialAction(ExposureMode.PROGRAM, CameraKeys.ENTER))
         assertNull(dialAction(ExposureMode.MANUAL, CameraKeys.AEL))
