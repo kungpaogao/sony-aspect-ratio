@@ -80,7 +80,8 @@ aapt2 dump resources framework-res.apk | grep -A1 'resource 0x0108072c'
 unzip framework-res.apk 'res/drawable*'
 ```
 
-The ILCE-7R's has about 7,000 drawables, with Sony's own names (`p_16_dd_parts_arrow_top`, ...). The PNGs
+The ILCE-7R's has about 7,000 drawables. Sony's OSD set is the ~3,100 named `p_*` and `s_*`
+(`p_16_dd_parts_arrow_top`, ...); the rest are stock Android. The PNGs
 are Sony's artwork, so they stay out of this repo; a local copy lives in the gitignored `plans/` folder.
 
 ## Off the camera
