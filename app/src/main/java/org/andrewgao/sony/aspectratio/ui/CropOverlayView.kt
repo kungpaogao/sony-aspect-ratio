@@ -18,7 +18,7 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
     private var liveView: CropRect? = null
 
     init {
-        dim.color = 0xBD6E6E6E.toInt()
+        dim.color = 0x40000000 // black at 25%
         dim.style = Paint.Style.FILL
         border.color = Color.WHITE
         border.style = Paint.Style.STROKE
