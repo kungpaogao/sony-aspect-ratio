@@ -10,7 +10,6 @@
   // ---- geometry (matches make_app_icon.py, "card" shape) -------------------------------------
   const FILE_W = 72, FILE_H = 72;
   const CARD_X = 3, CARD_Y = 2, CARD_W = 66, CARD_H = 66;
-  const CORNER_RADIUS = 1.5;
   const BADGE_SVG_W = 60, BADGE_SVG_H = 32;
   const CARD_ASPECT = CARD_W / CARD_H; // crop window aspect (1:1)
   const CARD_SHADOW_DY = 2;
@@ -31,6 +30,7 @@
     { id: 'contrast', label: 'Contrast', min: 0, max: 2, step: 0.01, def: 1.08, dp: 2 },
     { id: 'sharpen', label: 'Sharpen', min: 0, max: 2, step: 0.01, def: 0.6, dp: 2 },
     { id: 'border', label: 'Border bright', min: 0, max: 1, step: 0.01, def: 0.68, dp: 2, group: true },
+    { id: 'radius', label: 'Corner radius', min: 0, max: 10, step: 0.5, def: 4, dp: 1 },
     { id: 'badgeShadow', label: 'Badge shadow', min: 0, max: 1, step: 0.01, def: 0.75, dp: 2 },
     { id: 'cardShadow', label: 'Card shadow', min: 0, max: 1, step: 0.01, def: 0.55, dp: 2 },
   ];
@@ -236,38 +236,65 @@
   }
 
   // Card face from the outside in: #222 outline, light line (photo toward white), the photo.
+  // Each inner layer has its own rounded shape (radius shrinking with the inset), so the outline and
+  // the light line follow the corner curve instead of being clipped by the card mask.
   function buildFace(px) {
     const face = new ImageData(CARD_W, CARD_H);
-    const f = face.data, b = params.border;
+    const f = face.data, b = params.border, r = params.radius;
+    const light = roundedAlpha(CARD_W - 2, CARD_H - 2, Math.max(r - 1, 0));
+    const inner = roundedAlpha(CARD_W - 4, CARD_H - 4, Math.max(r - 2, 0));
     for (let y = 0; y < CARD_H; y++) {
       for (let x = 0; x < CARD_W; x++) {
         const o = (y * CARD_W + x) * 4;
-        let r = 0x22, g = 0x22, bl = 0x22;
-        if (x >= 2 && x < CARD_W - 2 && y >= 2 && y < CARD_H - 2) {
-          r = px[o]; g = px[o + 1]; bl = px[o + 2];
-        } else if (x >= 1 && x < CARD_W - 1 && y >= 1 && y < CARD_H - 1) {
-          r = Math.trunc(px[o] + b * (255 - px[o]));
-          g = Math.trunc(px[o + 1] + b * (255 - px[o + 1]));
-          bl = Math.trunc(px[o + 2] + b * (255 - px[o + 2]));
+        const a1 = x >= 1 && x < CARD_W - 1 && y >= 1 && y < CARD_H - 1
+          ? light[(y - 1) * (CARD_W - 2) + x - 1] / 255 : 0;
+        const a2 = x >= 2 && x < CARD_W - 2 && y >= 2 && y < CARD_H - 2
+          ? inner[(y - 2) * (CARD_W - 4) + x - 2] / 255 : 0;
+        for (let c = 0; c < 3; c++) {
+          const lightC = Math.trunc(px[o + c] + b * (255 - px[o + c]));
+          let v = 0x22 + (lightC - 0x22) * a1;
+          v = v + (px[o + c] - v) * a2;
+          f[o + c] = Math.round(v);
         }
-        f[o] = r; f[o + 1] = g; f[o + 2] = bl; f[o + 3] = 255;
+        f[o + 3] = 255;
       }
     }
     return face;
   }
 
+  // Alpha (0..255) of a w x h rounded rect with radius r, drawn at 4x and reduced for smooth corners.
+  const alphaCache = new Map();
+  function roundedAlpha(w, h, r) {
+    const key = w + 'x' + h + '@' + r;
+    if (alphaCache.has(key)) return alphaCache.get(key);
+    const big = makeCanvas(w * 4, h * 4);
+    const g = big.getContext('2d');
+    g.fillStyle = '#000';
+    g.beginPath();
+    g.roundRect(0, 0, w * 4, h * 4, r * 4);
+    g.fill();
+    const small = resample(big, 0, 0, big.width, big.height, w, h);
+    const d = ctx2d(small, { willReadFrequently: true }).getImageData(0, 0, w, h).data;
+    const a = new Uint8ClampedArray(w * h);
+    for (let i = 0; i < a.length; i++) a[i] = d[i * 4 + 3];
+    alphaCache.set(key, a);
+    return a;
+  }
+
   // Rounded-rect card mask, drawn at 4x and reduced for smooth corners.
-  let maskCanvas = null;
+  const maskCache = new Map();
   function cardMask() {
-    if (maskCanvas) return maskCanvas;
+    const r = params.radius;
+    if (maskCache.has(r)) return maskCache.get(r);
     const big = makeCanvas(CARD_W * 4, CARD_H * 4);
     const g = big.getContext('2d');
     g.fillStyle = '#000';
     g.beginPath();
-    g.roundRect(0, 0, CARD_W * 4, CARD_H * 4, CORNER_RADIUS * 4);
+    g.roundRect(0, 0, CARD_W * 4, CARD_H * 4, r * 4);
     g.fill();
-    maskCanvas = resample(big, 0, 0, big.width, big.height, CARD_W, CARD_H);
-    return maskCanvas;
+    const mask = resample(big, 0, 0, big.width, big.height, CARD_W, CARD_H);
+    maskCache.set(r, mask);
+    return mask;
   }
 
   // Darken the face under the badge's drop shadow (black, alpha from the badge, offset, blurred).
