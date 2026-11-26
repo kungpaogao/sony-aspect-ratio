@@ -19,4 +19,5 @@ data class ShootingState(
     val exposureMode: ExposureMode = ExposureMode.UNKNOWN,
     val batteryLevel: Int = -1,
     val liveView: CropRect? = null,
+    val magnification: Magnification = Magnification(),
 )

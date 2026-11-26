@@ -39,6 +39,8 @@ class ShootingControls {
     private val mutableFocusMode = MutableStateFlow(FocusMode.UNKNOWN)
     val focusMode: StateFlow<FocusMode> = mutableFocusMode
 
+    val magnifier = Magnifier { mutableFocusMode.value }
+
     private var camera: Camera? = null
     private val loggedFailures = mutableSetOf<String>()
 
@@ -67,9 +69,11 @@ class ShootingControls {
             "exposure mode=${e.sceneMode} ${e.shutterNumerator}/${e.shutterDenominator} " +
                 "f/${e.apertureX100} ev=${e.evIndex}x${e.evStep} iso=${e.iso}",
         )
+        magnifier.attach(active)
     }
 
     fun detach() {
+        magnifier.detach()
         cancelFocus()
         camera?.setShutterSpeedListener(null)
         camera?.setApertureListener(null)

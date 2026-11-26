@@ -72,6 +72,11 @@ class ShootingViewModel(
         scope.launch {
             session.controls.focusMode.collect { mode -> setState { copy(focusMode = mode) } }
         }
+        scope.launch {
+            session.controls.magnifier.state.collect { magnification ->
+                setState { copy(magnification = magnification) }
+            }
+        }
     }
 
     fun onSurface(surfaceHolder: SurfaceHolder?) {
@@ -114,10 +119,26 @@ class ShootingViewModel(
             pressedButton = button
             when (button) {
                 FocusButton.AUTOFOCUS -> session.controls.focus()
-                FocusButton.MAGNIFY -> {}
+                FocusButton.MAGNIFY -> session.controls.magnifier.cycle()
             }
             return true
         }
+        if (state.value.magnification.on) {
+            val magnifier = session.controls.magnifier
+            when (key) {
+                CameraKeys.UP -> magnifier.move(0, -1)
+                CameraKeys.DOWN -> magnifier.move(0, 1)
+                CameraKeys.LEFT -> magnifier.move(-1, 0)
+                CameraKeys.RIGHT -> magnifier.move(1, 0)
+                CameraKeys.ENTER -> magnifier.recenter()
+                else -> return onKeyDownUnmagnified(key)
+            }
+            return true
+        }
+        return onKeyDownUnmagnified(key)
+    }
+
+    private fun onKeyDownUnmagnified(key: Int): Boolean {
         if (key == CameraKeys.ENTER) {
             setState { copy(choosingRatio = !choosingRatio) }
             return true
@@ -164,6 +185,8 @@ class ShootingViewModel(
         if (shot?.isActive == true) return
         val aspect = state.value.aspect
         Trace.line("shutter " + aspect.label)
+        // Sony leaves magnification before shooting.
+        if (state.value.magnification.on) session.controls.magnifier.stop()
         shot = scope.launch {
             setState { copy(shooting = true) }
             try {

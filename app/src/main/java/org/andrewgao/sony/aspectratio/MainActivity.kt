@@ -191,6 +191,7 @@ class MainActivity : Activity() {
     }
 
     private fun render(state: ShootingState) {
+        overlay.visibility = if (state.magnification.on) View.INVISIBLE else View.VISIBLE
         overlay.setAspect(state.aspect)
         overlay.setLiveView(state.liveView)
         overlay.setFocusLocked(state.focus == Focus.LOCKED)
