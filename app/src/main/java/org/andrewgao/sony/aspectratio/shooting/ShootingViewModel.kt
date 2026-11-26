@@ -17,7 +17,8 @@ class ShootingViewModel(
     private val context: Context,
     recreateSurface: () -> Unit,
 ) : ViewModel<ShootingState>(ShootingState()) {
-    private val session = CropSession.create(recreateSurface = recreateSurface, onStatus = ::status)
+    private val session =
+        CropSession.create(recreateSurface = recreateSurface, onStatus = Trace::line)
     private val liveViewArea = LiveViewArea()
     private val deviceStatus = DeviceStatus()
     private var shot: Job? = null
@@ -149,11 +150,11 @@ class ShootingViewModel(
     fun shoot() {
         if (shot?.isActive == true) return
         val aspect = state.value.aspect
-        status("shutter " + aspect.label)
+        Trace.line("shutter " + aspect.label)
         shot = scope.launch {
             setState { copy(shooting = true) }
             try {
-                status(session.takePicture(context, aspect))
+                Trace.line(session.takePicture(context, aspect))
             } finally {
                 shot = null
                 setState { copy(shooting = false) }
@@ -165,10 +166,5 @@ class ShootingViewModel(
         val surfaceHolder = holder ?: return
         if (!started) return
         session.open(surfaceHolder)
-    }
-
-    private fun status(message: String) {
-        Trace.line(message)
-        setState { copy(message = message) }
     }
 }

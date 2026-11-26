@@ -31,7 +31,7 @@ class MainActivity : Activity() {
     private lateinit var binding: StateBinding<ShootingState>
     private lateinit var surface: SurfaceView
     private lateinit var overlay: CropOverlayView
-    private lateinit var logView: TextView
+    private lateinit var processingText: TextView
     private lateinit var modeIcon: ImageView
     private lateinit var modeText: TextView
     private lateinit var aspectChip: TextView
@@ -56,7 +56,7 @@ class MainActivity : Activity() {
         setContentView(R.layout.activity_main)
         surface = findViewById(R.id.preview_surface) as SurfaceView
         overlay = findViewById(R.id.crop_overlay) as CropOverlayView
-        logView = findViewById(R.id.log) as TextView
+        processingText = findViewById(R.id.processing) as TextView
         modeIcon = findViewById(R.id.mode_icon) as ImageView
         modeText = findViewById(R.id.mode_text) as TextView
         aspectChip = findViewById(R.id.aspect_chip) as TextView
@@ -91,6 +91,7 @@ class MainActivity : Activity() {
                     isoLabel,
                     isoValue,
                     focusModeText,
+                    processingText,
                 )
                 .forEach { it.typeface = univers }
         }
@@ -191,7 +192,7 @@ class MainActivity : Activity() {
     private fun render(state: ShootingState) {
         overlay.setAspect(state.aspect)
         overlay.setLiveView(state.liveView)
-        logView.text = state.message
+        processingText.visibility = if (state.shooting) View.VISIBLE else View.GONE
 
         showIcon(modeIcon, NativeIcons.modeDrawable(resources, state.exposureMode), modeText)
         modeText.text = state.mode

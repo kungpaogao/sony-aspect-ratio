@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Aspect ratio</string>
     <string name="iso_label">ISO</string>
+    <string name="processing">Processing...</string>
 </resources>
