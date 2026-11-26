@@ -104,12 +104,7 @@ class MainActivity : Activity() {
             "readout widths shutter=$shutterWidth aperture=$apertureWidth " +
                 "ev=$exposureWidth iso=$isoWidth",
         )
-        viewModel =
-            ShootingViewModel(
-                applicationContext,
-                ::recreateSurface,
-                "build ${BuildConfig.BUILD_TIME}",
-            )
+        viewModel = ShootingViewModel(applicationContext, ::recreateSurface)
         binding = StateBinding(viewModel.state, ::render)
         // Required on API 10, which is what the camera emulator runs.
         @Suppress("DEPRECATION") surface.holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)

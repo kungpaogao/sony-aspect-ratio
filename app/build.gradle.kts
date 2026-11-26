@@ -1,16 +1,5 @@
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
-
 plugins {
     alias(libs.plugins.android.application)
-}
-
-val buildTimeFormatter = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
-val buildTimeFormatted: String = run {
-    buildTimeFormatter.timeZone = TimeZone.getTimeZone("UTC")
-    buildTimeFormatter.format(Date())
 }
 
 android {
@@ -21,10 +10,6 @@ android {
         version = release(16)
     }
 
-    buildFeatures {
-        buildConfig = true
-    }
-
     defaultConfig {
         applicationId = "org.andrewgao.sony.aspectratio"
         minSdk = 10
@@ -32,8 +17,6 @@ android {
         targetSdk = 10
         versionCode = 1
         versionName = "1.0"
-
-        buildConfigField("String", "BUILD_TIME", "\"$buildTimeFormatted\"")
     }
 
     buildTypes {

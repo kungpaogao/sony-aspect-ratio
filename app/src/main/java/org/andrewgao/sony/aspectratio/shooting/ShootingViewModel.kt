@@ -16,8 +16,7 @@ import org.andrewgao.sony.aspectratio.shared.ViewModel
 class ShootingViewModel(
     private val context: Context,
     recreateSurface: () -> Unit,
-    initialMessage: String = "",
-) : ViewModel<ShootingState>(ShootingState(message = initialMessage)) {
+) : ViewModel<ShootingState>(ShootingState()) {
     private val session = CropSession.create(recreateSurface = recreateSurface, onStatus = ::status)
     private val liveViewArea = LiveViewArea()
     private val deviceStatus = DeviceStatus()
@@ -26,7 +25,6 @@ class ShootingViewModel(
     private var started = false
 
     init {
-        if (initialMessage.isNotEmpty()) Trace.line(initialMessage)
         scope.launch {
             liveViewArea.area.collect { area -> setState { copy(liveView = area) } }
         }
