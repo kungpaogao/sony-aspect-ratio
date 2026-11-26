@@ -25,6 +25,9 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
     private var camera: Camera? = null
     val controls = ShootingControls()
 
+    /** The camera's Auto Review setting, put back on release; null until it has been read. */
+    private var savedAutoReview: Int? = null
+
     fun open(holder: SurfaceHolder) {
         try {
             val newlyOpened = camera == null
@@ -39,7 +42,10 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
                         .also { camera = it }
             active.setPreviewDisplay(holder)
             startPreview(active)
-            if (newlyOpened) controls.attach(active)
+            if (newlyOpened) {
+                turnOffAutoReview(active)
+                controls.attach(active)
+            }
         } catch (error: Exception) {
             onStatus("camera " + describe(error))
             release()
@@ -67,6 +73,7 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
         val active = camera ?: return
         camera = null
         controls.detach()
+        restoreAutoReview(active)
         try {
             active.stopPreview()
         } catch (error: Exception) {
@@ -110,6 +117,32 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
             return "saved ${aspect.label} ${crop.width}x${crop.height}"
         } finally {
             cropped.release()
+        }
+    }
+
+    /**
+     * The camera's review would show the whole frame while the crop is being made, so it is off
+     * while the app has the camera, as in Sony's processing apps.
+     */
+    private fun turnOffAutoReview(active: Camera) {
+        try {
+            val time = active.autoReviewTime
+            savedAutoReview = time
+            if (time != 0) active.autoReviewTime = 0
+            Trace.line("auto review $time, off while shooting")
+        } catch (error: Exception) {
+            Trace.line("auto review " + describe(error))
+        }
+    }
+
+    private fun restoreAutoReview(active: Camera) {
+        val time = savedAutoReview ?: return
+        savedAutoReview = null
+        if (time == 0) return
+        try {
+            active.autoReviewTime = time
+        } catch (error: Exception) {
+            Trace.line("auto review restore " + describe(error))
         }
     }
 
