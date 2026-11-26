@@ -18,6 +18,7 @@ import com.github.ma1co.openmemories.framework.DeviceInfo
 import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.shared.StateBinding
 import org.andrewgao.sony.aspectratio.shooting.Focus
+import org.andrewgao.sony.aspectratio.shooting.FocusMode
 import org.andrewgao.sony.aspectratio.shooting.ShootingState
 import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
@@ -46,6 +47,8 @@ class MainActivity : Activity() {
     private lateinit var isoValue: TextView
     private lateinit var focusIcon: ImageView
     private lateinit var focusIndicator: TextView
+    private lateinit var focusModeIcon: ImageView
+    private lateinit var focusModeText: TextView
     private var leaving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +72,8 @@ class MainActivity : Activity() {
         isoValue = findViewById(R.id.iso_value) as TextView
         focusIcon = findViewById(R.id.focus_icon) as ImageView
         focusIndicator = findViewById(R.id.focus_indicator) as TextView
+        focusModeIcon = findViewById(R.id.focus_mode_icon) as ImageView
+        focusModeText = findViewById(R.id.focus_mode_text) as TextView
         Trace.line("typefaces " + OsdTypeface.names().joinToString(","))
         val metrics = resources.displayMetrics
         Trace.line(
@@ -85,6 +90,7 @@ class MainActivity : Activity() {
                     exposureText,
                     isoLabel,
                     isoValue,
+                    focusModeText,
                 )
                 .forEach { it.typeface = univers }
         }
@@ -210,6 +216,17 @@ class MainActivity : Activity() {
         isoValue.text = state.iso
 
         renderFocus(state.focus)
+        renderFocusMode(state.focusMode)
+    }
+
+    private fun renderFocusMode(mode: FocusMode) {
+        if (mode == FocusMode.UNKNOWN) {
+            focusModeIcon.visibility = View.GONE
+            focusModeText.visibility = View.GONE
+            return
+        }
+        showIcon(focusModeIcon, NativeIcons.focusModeDrawable(resources, mode), focusModeText)
+        focusModeText.text = mode.label
     }
 
     private fun renderFocus(focus: Focus) {

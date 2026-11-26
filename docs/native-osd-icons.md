@@ -28,7 +28,9 @@ the view shows its text fallback.
    `shooting_parts_sid_basic_info_for_info_on_panel.xml` (top row), `shooting_parts_sid_footer_panel.xml`
    (bottom row), `af_*.xml`, and `drawable-nodpi/icon_battery.xml` (a level list). aapt2 is in
    `~/Library/Android/sdk/build-tools/<version>/aapt2`.
-4. The IDs were identical in digital-filter, bracket-pro, time-lapse and star-trails, so they look like
+4. For the a7R's 4:3 panel, the focus-mode icons are in `res/layout-notlong/icon_focusmode.xml`, since
+   `res/layout/` has no `icon_focusmode.xml`.
+5. The IDs were identical in digital-filter, bracket-pro, time-lapse and star-trails, so they look like
    stable platform constants.
 
 ## IDs
@@ -48,6 +50,11 @@ the view shows its text fallback.
 | Exposure compensation mark | `0x010810fc` | 36x34 |
 | AF locked dot (green) / AF-C arcs (green) | `0x01080e84` / `0x01080e85` | 44x40 |
 | AE lock (asterisk) | `0x01080fe3` | 42x40 |
+| Focus mode AF-A | `0x01081369` | 70x60 slot (bitmap size not yet checked on the a7R) |
+| Focus mode AF-S | `0x01081345` | 70x60 slot (bitmap size not yet checked on the a7R) |
+| Focus mode AF-C | `0x0108138c` | 70x60 slot (bitmap size not yet checked on the a7R) |
+| Focus mode MF | `0x010808a9` | 70x60 slot (bitmap size not yet checked on the a7R) |
+| Focus mode DMF | `0x010808ab` | 70x60 slot (bitmap size not yet checked on the a7R) |
 | Still aspect 3:2, 16:9, 4:3, 1:1 | `0x01081020`, `0x01080974`, `0x0108129d`, `0x01081242` | 47x32 |
 
 Battery level thresholds come from `ScalarProperties.getIntArray("ui.battery.threshold.list")`, default
