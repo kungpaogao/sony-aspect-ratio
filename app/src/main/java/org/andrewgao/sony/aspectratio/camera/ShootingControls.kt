@@ -46,6 +46,7 @@ class ShootingControls {
         camera = active
         loggedFailures.clear()
         refresh()
+        readFocusMode(active)
         active.setShutterSpeedListener { n, d ->
             mutableExposure.value =
                 mutableExposure.value.copy(shutterNumerator = n, shutterDenominator = d)
@@ -176,10 +177,14 @@ class ShootingControls {
                 evStep = read("evStep", 0f) { params.exposureCompensationStep },
                 iso = read("iso", 0) { params.iso },
             )
-        refreshFocusMode(params)
     }
 
-    private fun refreshFocusMode(params: CameraParameters) {
+    /**
+     * Read once per attach, not on every [refresh]: nothing in the app changes the focus mode, and
+     * an earlier camera hang was suspected (never confirmed) to come from Sony's getAutoFocusMode.
+     */
+    private fun readFocusMode(active: Camera) {
+        val params = read("parameters", null) { active.parameters } ?: return
         val raw = read("focusMode", null) { params.focusMode }
         // Like Sony's apps, read the AF mode only when the focus mode is auto.
         val rawAuto =
