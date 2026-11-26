@@ -16,13 +16,14 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
     private val border = Paint()
     private var aspect = AspectRatio.DEFAULT
     private var liveView: CropRect? = null
+    private var focusLocked = false
 
     init {
         dim.color = 0x40000000 // black at 25%
         dim.style = Paint.Style.FILL
-        border.color = Color.WHITE
+        border.color = BORDER_COLOR
         border.style = Paint.Style.STROKE
-        border.strokeWidth = 1f
+        border.strokeWidth = BORDER_WIDTH
         setWillNotDraw(false)
     }
 
@@ -33,6 +34,14 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
 
     fun setLiveView(area: CropRect?) {
         liveView = area
+        invalidate()
+    }
+
+    fun setFocusLocked(locked: Boolean) {
+        if (locked == focusLocked) return
+        focusLocked = locked
+        border.color = if (locked) LOCKED_BORDER_COLOR else BORDER_COLOR
+        border.strokeWidth = if (locked) LOCKED_BORDER_WIDTH else BORDER_WIDTH
         invalidate()
     }
 
@@ -60,5 +69,13 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
             frame.bottom - half,
             border,
         )
+    }
+
+    private companion object {
+        const val BORDER_COLOR = Color.WHITE
+        const val BORDER_WIDTH = 1f
+        // Paper artboard "AF on": green 4px frame while autofocus is locked.
+        const val LOCKED_BORDER_COLOR = 0xFF02C300.toInt()
+        const val LOCKED_BORDER_WIDTH = 4f
     }
 }

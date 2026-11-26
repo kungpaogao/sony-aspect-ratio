@@ -192,6 +192,7 @@ class MainActivity : Activity() {
     private fun render(state: ShootingState) {
         overlay.setAspect(state.aspect)
         overlay.setLiveView(state.liveView)
+        overlay.setFocusLocked(state.focus == Focus.LOCKED)
         processingText.visibility = if (state.shooting) View.VISIBLE else View.GONE
 
         showIcon(modeIcon, NativeIcons.modeDrawable(resources, state.exposureMode), modeText)
