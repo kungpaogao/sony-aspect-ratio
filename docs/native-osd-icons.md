@@ -50,11 +50,12 @@ the view shows its text fallback.
 | Exposure compensation mark | `0x010810fc` | 36x34 |
 | AF locked dot (green) / AF-C arcs (green) | `0x01080e84` / `0x01080e85` | 44x40 |
 | AE lock (asterisk) | `0x01080fe3` | 42x40 |
-| Focus mode AF-A | `0x01081369` | 70x60 slot (bitmap size not yet checked on the a7R) |
-| Focus mode AF-S | `0x01081345` | 70x60 slot (bitmap size not yet checked on the a7R) |
-| Focus mode AF-C | `0x0108138c` | 70x60 slot (bitmap size not yet checked on the a7R) |
-| Focus mode MF | `0x010808a9` | 70x60 slot (bitmap size not yet checked on the a7R) |
-| Focus mode DMF | `0x010808ab` | 70x60 slot (bitmap size not yet checked on the a7R) |
+| Focus mode AF-A | `0x01081369` | 70x60 |
+| Focus mode AF-S | `0x01081345` | 70x60 |
+| Focus mode AF-C | `0x0108138c` | 70x60 |
+| Focus mode MF | `0x010808a9` | 70x60 |
+| Focus mode DMF | `0x010808ab` | 70x60 |
+| Focus mode, EVF set (AF-S, AF-C, AF-A, MF, DMF) | `0x01080881`, `0x0108084d`, `0x01080f09`, `0x01080ecf`, `0x01080844` | 58x50 |
 | Still aspect 3:2, 16:9, 4:3, 1:1 | `0x01081020`, `0x01080974`, `0x0108129d`, `0x01081242` | 47x32 |
 
 Battery level thresholds come from `ScalarProperties.getIntArray("ui.battery.threshold.list")`, default
