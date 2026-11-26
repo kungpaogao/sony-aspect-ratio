@@ -196,7 +196,7 @@ class MainActivity : Activity() {
         apertureText.text = state.aperture
         exposureText.text = state.exposure
         showIcon(isoIcon, NativeIcons.drawable(resources, NativeIcons.ISO_LABEL), isoLabel)
-        isoValue.text = " ${state.iso}"
+        isoValue.text = state.iso
 
         renderFocus(state.focus)
     }

@@ -19,8 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|left"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="2dp">
+        android:layout_marginTop="8px">
 
         <ImageView
             android:id="@+id/mode_icon"
@@ -35,40 +34,28 @@
             style="@style/OsdShadow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8px"
+            android:includeFontPadding="false"
             android:text="--"
-            android:textSize="30sp" />
+            android:textSize="30px" />
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/aspect_chip"
-        style="@style/OsdShadow"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="10dp"
-        android:background="#63000000"
-        android:paddingLeft="12dp"
-        android:paddingTop="4dp"
-        android:paddingRight="12dp"
-        android:paddingBottom="4dp"
-        android:textSize="18sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|right"
-        android:layout_marginTop="14dp"
-        android:layout_marginRight="16dp"
+        android:layout_gravity="top|left"
+        android:layout_marginLeft="112px"
+        android:layout_marginTop="7px"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/shots_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="4dp"
+            android:layout_width="39px"
+            android:layout_height="27px"
+            android:layout_marginRight="4px"
             android:contentDescription="@null"
-            android:scaleType="centerInside"
+            android:scaleType="fitXY"
             android:visibility="gone" />
 
         <TextView
@@ -76,17 +63,42 @@
             style="@style/OsdShadow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:includeFontPadding="false"
             android:text="--"
-            android:textSize="18sp" />
+            android:textSize="21px" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/aspect_chip"
+        style="@style/OsdShadow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="8px"
+        android:background="@drawable/osd_chip"
+        android:includeFontPadding="false"
+        android:paddingLeft="6px"
+        android:paddingTop="2px"
+        android:paddingRight="6px"
+        android:paddingBottom="2px"
+        android:textSize="22px" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:layout_marginTop="7px"
+        android:layout_marginRight="19px"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/battery_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="4dp"
+            android:layout_width="41px"
+            android:layout_height="27px"
+            android:layout_marginRight="4px"
             android:contentDescription="@null"
-            android:scaleType="centerInside"
+            android:scaleType="fitXY"
             android:visibility="gone" />
 
         <TextView
@@ -94,36 +106,41 @@
             style="@style/OsdShadow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:includeFontPadding="false"
             android:text="--"
-            android:textSize="18sp" />
+            android:textSize="21px" />
     </LinearLayout>
 
     <FrameLayout
         android:id="@+id/bottom_bar"
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="52px"
         android:layout_gravity="bottom"
         android:background="@android:color/transparent">
 
         <ImageView
             android:id="@+id/focus_icon"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_gravity="center_vertical|left"
-            android:layout_marginLeft="8dp"
+            android:layout_width="28px"
+            android:layout_height="28px"
+            android:layout_gravity="top|left"
+            android:layout_marginLeft="10px"
+            android:layout_marginTop="12px"
             android:contentDescription="@null"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/focus_indicator"
             style="@style/OsdShadow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|left"
-            android:layout_marginLeft="8dp"
+            android:layout_width="28px"
+            android:layout_height="28px"
+            android:layout_gravity="top|left"
+            android:layout_marginLeft="10px"
+            android:layout_marginTop="12px"
+            android:gravity="center"
+            android:includeFontPadding="false"
             android:text="●"
-            android:textSize="20sp"
+            android:textSize="20px"
             android:visibility="gone" />
 
         <LinearLayout
@@ -138,31 +155,34 @@
                 style="@style/OsdShadow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:includeFontPadding="false"
                 android:text="--"
-                android:textSize="22sp" />
+                android:textSize="32px" />
 
             <TextView
                 android:id="@+id/aperture_text"
                 style="@style/OsdShadow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="57px"
+                android:includeFontPadding="false"
                 android:text="--"
-                android:textSize="22sp" />
+                android:textSize="32px" />
 
             <TextView
                 android:id="@+id/exposure_text"
                 style="@style/OsdShadow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="57px"
+                android:includeFontPadding="false"
                 android:text="--"
-                android:textSize="22sp" />
+                android:textSize="32px" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="57px"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
@@ -170,7 +190,6 @@
                     android:id="@+id/iso_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="4dp"
                     android:contentDescription="@null"
                     android:scaleType="centerInside"
                     android:visibility="gone" />
@@ -180,8 +199,9 @@
                     style="@style/OsdShadow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:includeFontPadding="false"
                     android:text="@string/iso_label"
-                    android:textSize="16sp"
+                    android:textSize="20px"
                     android:textStyle="bold" />
 
                 <TextView
@@ -189,8 +209,10 @@
                     style="@style/OsdShadow"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=" --"
-                    android:textSize="22sp" />
+                    android:layout_marginLeft="4px"
+                    android:includeFontPadding="false"
+                    android:text="--"
+                    android:textSize="32px" />
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>
@@ -201,7 +223,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="36dp"
+        android:layout_marginBottom="52px"
         android:background="@android:color/transparent"
         android:padding="8dp"
         android:textSize="14sp" />
