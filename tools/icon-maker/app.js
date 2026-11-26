@@ -30,7 +30,7 @@
     { id: 'contrast', label: 'Contrast', min: 0, max: 2, step: 0.01, def: 1.08, dp: 2 },
     { id: 'sharpen', label: 'Sharpen', min: 0, max: 2, step: 0.01, def: 0.6, dp: 2 },
     { id: 'border', label: 'Border bright', min: 0, max: 1, step: 0.01, def: 0.68, dp: 2, group: true },
-    { id: 'radius', label: 'Corner radius', min: 0, max: 10, step: 0.5, def: 4, dp: 1 },
+    { id: 'radius', label: 'Corner radius', min: 0, max: 10, step: 0.25, def: 2.75, dp: 2 },
     { id: 'badgeShadow', label: 'Badge shadow', min: 0, max: 1, step: 0.01, def: 0.75, dp: 2 },
     { id: 'cardShadow', label: 'Card shadow', min: 0, max: 1, step: 0.01, def: 0.55, dp: 2 },
   ];
