@@ -15,7 +15,6 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
     private val dim = Paint()
     private val outerBlack = Paint()
     private val whiteBand = Paint()
-    private val innerBlack = Paint()
     private var aspect = AspectRatio.DEFAULT
     private var liveView: CropRect? = null
 
@@ -28,9 +27,6 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         whiteBand.color = Color.WHITE
         whiteBand.style = Paint.Style.STROKE
         whiteBand.strokeWidth = 4f
-        innerBlack.color = Color.BLACK
-        innerBlack.style = Paint.Style.STROKE
-        innerBlack.strokeWidth = 1f
         setWillNotDraw(false)
     }
 
@@ -76,14 +72,5 @@ class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
                 frame.bottom - insetWhite,
             )
         canvas.drawRect(white, whiteBand)
-        val insetInner = insetWhite + whiteBand.strokeWidth / 2f + innerBlack.strokeWidth / 2f
-        val inner =
-            RectF(
-                frame.left + insetInner,
-                frame.top + insetInner,
-                frame.right - insetInner,
-                frame.bottom - insetInner,
-            )
-        canvas.drawRect(inner, innerBlack)
     }
 }
