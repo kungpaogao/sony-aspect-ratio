@@ -9,8 +9,8 @@ python3 tools/icon-maker/server.py
 ```
 Then open http://127.0.0.1:8765. Options: `--port N`, `--root PATH` (defaults to the repo's git top-level).
 
-## Why the file is 72×96 and squeezed
-The camera's app menu stretches the 72×96 file to a square, so the art is designed square and then squeezed to 75% of its width.
+## The icon is a square 72×72 PNG
+The icon is a square 72×72 PNG, shown as stored: the same width as Sony's 72×96 app cards. The card is 66×66 at (3,2), which leaves room below it for the shadow.
 
 ## Where the assets come from
 - The badge SVG comes from `plans/icon-maker/make_icon.py`, which draws Univers Condensed as outlines.

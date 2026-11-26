@@ -19,7 +19,7 @@ from urllib.parse import unquote, urlsplit
 HERE = Path(__file__).resolve().parent
 MAX_BYTES = 1024 * 1024
 PNG_SIG = b"\x89PNG\r\n\x1a\n"
-ICON_W, ICON_H = 72, 96
+ICON_W, ICON_H = 72, 72
 TYPES = {
     ".html": "text/html; charset=utf-8",
     ".js": "text/javascript; charset=utf-8",
@@ -45,7 +45,7 @@ def find_root():
 
 
 def validate_png(data):
-    """Return an error string, or None if data is a 72x96 PNG within limits."""
+    """Return an error string, or None if data is a 72x72 PNG within limits."""
     if len(data) > MAX_BYTES:
         return "PNG is larger than 1 MB"
     if not data.startswith(PNG_SIG):

@@ -1,20 +1,18 @@
-/* Icon maker: photo -> 72x96 launcher icon in the style of Sony's PlayMemories icons.
- * Canvas port of plans/icon-maker/make_app_icon.py (Pillow).
+/* Icon maker: photo -> square 72x72 launcher icon in the style of Sony's PlayMemories icons.
+ * Canvas port of plans/icon-maker/make_app_icon.py (Pillow), "square" shape.
  *
- * The camera's app menu stretches the 72x96 file to a square, so everything is designed square and
- * squeezed horizontally to 75% in the file: the photo crop has the on-screen aspect and is drawn
- * squeezed into the 68x88 card, and the badge's on-screen width W becomes round(0.75*W) in the file.
+ * The camera shows the file as stored. The 66x66 card sits at (3,2) in the 72x72 file, leaving
+ * room below it for the card shadow. The photo crop is square and the badge keeps its aspect ratio.
  */
 (() => {
   'use strict';
 
   // ---- geometry (matches make_app_icon.py, "card" shape) -------------------------------------
-  const FILE_W = 72, FILE_H = 96;
-  const CARD_X = 2, CARD_Y = 3, CARD_W = 68, CARD_H = 88;
+  const FILE_W = 72, FILE_H = 72;
+  const CARD_X = 3, CARD_Y = 2, CARD_W = 66, CARD_H = 66;
   const CORNER_RADIUS = 1.5;
-  const SQUEEZE = 0.75;
   const BADGE_SVG_W = 60, BADGE_SVG_H = 32;
-  const CARD_ASPECT = (CARD_W * 4 / 3) / CARD_H; // on-screen aspect of the card
+  const CARD_ASPECT = CARD_W / CARD_H; // crop window aspect (1:1)
   const CARD_SHADOW_DY = 2;
   const CARD_SHADOW_BLUR = 1.3;
   const BADGE_SHADOW_DX = 1, BADGE_SHADOW_DY = 2, BADGE_SHADOW_BLUR = 1.1;
@@ -27,8 +25,8 @@
     { id: 'panX', label: 'Pan X', min: 0, max: 1, step: 0.005, def: 0.55, dp: 3 },
     { id: 'panY', label: 'Pan Y', min: 0, max: 1, step: 0.005, def: 0.5, dp: 3 },
     { id: 'zoom', label: 'Zoom', min: 1, max: 4, step: 0.01, def: 1, dp: 2 },
-    { id: 'badgeW', label: 'Badge width', min: 40, max: 80, step: 1, def: 66, dp: 0, group: true },
-    { id: 'badgeTop', label: 'Badge top', min: 0, max: 60, step: 1, def: 8, dp: 0 },
+    { id: 'badgeW', label: 'Badge width', min: 30, max: 64, step: 1, def: 48, dp: 0, group: true },
+    { id: 'badgeTop', label: 'Badge top', min: 0, max: 50, step: 1, def: 7, dp: 0 },
     { id: 'saturation', label: 'Saturation', min: 0, max: 2, step: 0.01, def: 1.15, dp: 2, group: true },
     { id: 'contrast', label: 'Contrast', min: 0, max: 2, step: 0.01, def: 1.08, dp: 2 },
     { id: 'sharpen', label: 'Sharpen', min: 0, max: 2, step: 0.01, def: 0.6, dp: 2 },
@@ -36,7 +34,7 @@
     { id: 'badgeShadow', label: 'Badge shadow', min: 0, max: 1, step: 0.01, def: 0.75, dp: 2 },
     { id: 'cardShadow', label: 'Card shadow', min: 0, max: 1, step: 0.01, def: 0.55, dp: 2 },
   ];
-  const STORE_KEY = 'iconmaker.params.v1';
+  const STORE_KEY = 'iconmaker.params.v2';
 
   const params = {};
   for (const p of PARAMS) params[p.id] = p.def;
@@ -164,11 +162,11 @@
   const badgeCache = new Map(); // key "w,h" -> canvas
 
   function badgeFor(width) {
-    const bw = Math.round(SQUEEZE * width);
+    const bw = Math.round(width);
     const bh = Math.round(width * BADGE_SVG_H / BADGE_SVG_W);
     const key = bw + ',' + bh;
     if (badgeCache.has(key)) return badgeCache.get(key);
-    // Render big (vector-crisp, squeezed), then step down by halves to the final size.
+    // Render big (vector-crisp), then step down by halves to the final size.
     const big = makeCanvas(bw * BADGE_SS, bh * BADGE_SS);
     ctx2d(big).drawImage(badgeImg, 0, 0, big.width, big.height);
     const small = resample(big, 0, 0, big.width, big.height, bw, bh);
@@ -178,7 +176,7 @@
 
   // ---- rendering -----------------------------------------------------------------------------------
   function rawPhoto() {
-    // Crop window at the card's on-screen aspect, squeezed into 68x88. Cached per pan/zoom.
+    // Square crop window, scaled into the 66x66 card. Cached per pan/zoom.
     const { panX, panY, zoom } = params;
     const key = [panX, panY, zoom].join('|');
     if (photoCache.key === key) return photoCache.data;
@@ -342,30 +340,36 @@
   let references = []; // [{name, img}]
   let stripMine = null;
 
-  function drawStretched(canvas, img) {
+  // Draw an icon at its native size, centered in a 96px-tall row cell.
+  function drawNative(canvas, img) {
     const g = ctx2d(canvas);
-    g.fillStyle = '#1c1c1c';
-    g.fillRect(0, 0, canvas.width, canvas.height);
-    g.drawImage(img, 0, 0, canvas.width, canvas.height);
+    g.clearRect(0, 0, canvas.width, canvas.height);
+    g.drawImage(img, 0, 0);
   }
 
   function buildStrip() {
     const strip = $('strip');
     strip.textContent = '';
     stripMine = null;
-    const mk = (title) => {
-      const c = makeCanvas(96, 96);
+    const mk = (title, w, h) => {
+      const c = makeCanvas(w, h);
       c.title = title;
       return c;
     };
+    const addMine = () => {
+      stripMine = mk('Your icon', FILE_W, FILE_H);
+      stripMine.className = 'mine';
+      strip.appendChild(stripMine);
+    };
     const slot = Math.min(3, references.length);
     references.forEach((ref, i) => {
-      if (i === slot) { stripMine = mk('Your icon'); stripMine.className = 'mine'; strip.appendChild(stripMine); }
-      const c = mk(ref.name);
-      drawStretched(c, ref.img);
+      if (i === slot) addMine();
+      const w = ref.img.naturalWidth || ref.img.width, h = ref.img.naturalHeight || ref.img.height;
+      const c = mk(ref.name, w, h);
+      drawNative(c, ref.img);
       strip.appendChild(c);
     });
-    if (!stripMine) { stripMine = mk('Your icon'); stripMine.className = 'mine'; strip.appendChild(stripMine); }
+    if (!stripMine) addMine();
   }
 
   let renderQueued = false;
@@ -390,7 +394,7 @@
       g.fillRect(0, 0, c.width, c.height);
       g.drawImage(icon, 0, 0, c.width, c.height);
     }
-    if (stripMine) drawStretched(stripMine, icon);
+    if (stripMine) drawNative(stripMine, icon);
     document.body.dataset.ready = '1';
   }
 

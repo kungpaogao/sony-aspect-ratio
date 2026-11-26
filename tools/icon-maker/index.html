@@ -9,7 +9,7 @@
 <body>
 <header>
   <h1>Icon maker</h1>
-  <span class="sub">Photo → 72×96 launcher icon, Sony PlayMemories style</span>
+  <span class="sub">Photo → square 72×72 launcher icon, Sony PlayMemories style</span>
 </header>
 
 <main>
@@ -36,20 +36,20 @@
 
   <section class="previews" aria-label="Previews">
     <div class="panel">
-      <h2>On camera <span class="muted">file stretched to a square</span></h2>
+      <h2>Icon <span class="muted">1× and 3×</span></h2>
       <div class="cam">
-        <canvas id="cam1" width="96" height="96"></canvas>
-        <canvas id="cam3" width="288" height="288"></canvas>
+        <canvas id="cam1" width="72" height="72"></canvas>
+        <canvas id="cam3" width="216" height="216"></canvas>
       </div>
     </div>
 
     <div class="panel">
-      <h2>File <span class="muted">72×96 at 4×</span></h2>
-      <canvas id="filePreview" width="72" height="96"></canvas>
+      <h2>File <span class="muted">72×72 at 4×</span></h2>
+      <canvas id="filePreview" width="72" height="72"></canvas>
     </div>
 
     <div class="panel wide">
-      <h2>Launcher <span class="muted">among Sony's icons</span></h2>
+      <h2>Launcher <span class="muted">among Sony's 72×96 icons, at native size</span></h2>
       <div id="strip" class="strip"></div>
     </div>
   </section>
