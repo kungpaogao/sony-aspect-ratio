@@ -23,6 +23,7 @@ import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
 import org.andrewgao.sony.aspectratio.ui.NativeIcons
 import org.andrewgao.sony.aspectratio.ui.OsdTypeface
+import org.andrewgao.sony.aspectratio.ui.reserveWidthFor
 
 class MainActivity : Activity() {
     private lateinit var viewModel: ShootingViewModel
@@ -87,6 +88,16 @@ class MainActivity : Activity() {
                 )
                 .forEach { it.typeface = univers }
         }
+        // After the typeface, which measureText uses. The widest values each readout can show.
+        val shutterWidth = shutterText.reserveWidthFor("1/8000", "BULB", "30\"", "0.5\"")
+        val apertureWidth = apertureText.reserveWidthFor("F22", "F5.6", "F--")
+        val exposureWidth = exposureText.reserveWidthFor("+5.0", "-5.0", "±0.0")
+        val isoWidth = isoValue.reserveWidthFor("25600", "AUTO")
+        batteryText.reserveWidthFor("100%")
+        Trace.line(
+            "readout widths shutter=$shutterWidth aperture=$apertureWidth " +
+                "ev=$exposureWidth iso=$isoWidth",
+        )
         viewModel =
             ShootingViewModel(
                 applicationContext,
