@@ -19,9 +19,11 @@ import org.andrewgao.sony.aspectratio.camera.Trace
 import org.andrewgao.sony.aspectratio.shared.StateBinding
 import org.andrewgao.sony.aspectratio.shooting.Focus
 import org.andrewgao.sony.aspectratio.shooting.FocusMode
+import org.andrewgao.sony.aspectratio.shooting.Magnification
 import org.andrewgao.sony.aspectratio.shooting.ShootingState
 import org.andrewgao.sony.aspectratio.shooting.ShootingViewModel
 import org.andrewgao.sony.aspectratio.ui.CropOverlayView
+import org.andrewgao.sony.aspectratio.ui.MagnifierNavigatorView
 import org.andrewgao.sony.aspectratio.ui.NativeIcons
 import org.andrewgao.sony.aspectratio.ui.OsdTypeface
 import org.andrewgao.sony.aspectratio.ui.reserveWidthFor
@@ -35,6 +37,7 @@ class MainActivity : Activity() {
     private lateinit var modeIcon: ImageView
     private lateinit var modeText: TextView
     private lateinit var aspectChip: TextView
+    private lateinit var shotsGroup: View
     private lateinit var shotsIcon: ImageView
     private lateinit var shotsText: TextView
     private lateinit var batteryIcon: ImageView
@@ -49,6 +52,10 @@ class MainActivity : Activity() {
     private lateinit var focusIndicator: TextView
     private lateinit var focusModeIcon: ImageView
     private lateinit var focusModeText: TextView
+    private lateinit var magnifierGroup: View
+    private lateinit var magnifierIcon: ImageView
+    private lateinit var magnifierText: TextView
+    private lateinit var magnifierNavigator: MagnifierNavigatorView
     private var leaving = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +67,7 @@ class MainActivity : Activity() {
         modeIcon = findViewById(R.id.mode_icon) as ImageView
         modeText = findViewById(R.id.mode_text) as TextView
         aspectChip = findViewById(R.id.aspect_chip) as TextView
+        shotsGroup = findViewById(R.id.shots_group)
         shotsIcon = findViewById(R.id.shots_icon) as ImageView
         shotsText = findViewById(R.id.shots_text) as TextView
         batteryIcon = findViewById(R.id.battery_icon) as ImageView
@@ -74,6 +82,10 @@ class MainActivity : Activity() {
         focusIndicator = findViewById(R.id.focus_indicator) as TextView
         focusModeIcon = findViewById(R.id.focus_mode_icon) as ImageView
         focusModeText = findViewById(R.id.focus_mode_text) as TextView
+        magnifierGroup = findViewById(R.id.magnifier_group)
+        magnifierIcon = findViewById(R.id.magnifier_icon) as ImageView
+        magnifierText = findViewById(R.id.magnifier_text) as TextView
+        magnifierNavigator = findViewById(R.id.magnifier_navigator) as MagnifierNavigatorView
         Trace.line("typefaces " + OsdTypeface.names().joinToString(","))
         val metrics = resources.displayMetrics
         Trace.line(
@@ -91,6 +103,7 @@ class MainActivity : Activity() {
                     isoLabel,
                     isoValue,
                     focusModeText,
+                    magnifierText,
                     processingText,
                 )
                 .forEach { it.typeface = univers }
@@ -216,6 +229,32 @@ class MainActivity : Activity() {
 
         renderFocus(state.focus)
         renderFocusMode(state.focusMode)
+        renderMagnifier(state.magnification)
+    }
+
+    /**
+     * The magnifier's own OSD: its icon and ratio top-left and the zone map bottom-left, in place
+     * of the exposure mode, shots, aspect chip and focus mode. Runs after the per-element rendering
+     * above so it has the last word on visibility; with the magnifier off the mode icons keep what
+     * that rendering gave them.
+     */
+    private fun renderMagnifier(magnification: Magnification) {
+        val on = magnification.on
+        magnifierGroup.visibility = if (on) View.VISIBLE else View.GONE
+        magnifierNavigator.visibility = if (on) View.VISIBLE else View.GONE
+        magnifierNavigator.setMagnification(magnification)
+        // Nothing else touches these two, so they are put back here.
+        shotsGroup.visibility = if (on) View.GONE else View.VISIBLE
+        aspectChip.visibility = if (on) View.GONE else View.VISIBLE
+        if (!on) return
+        // The label stays beside the icon, so there is no text fallback; off the camera the icon
+        // is null and only the label shows.
+        showIcon(magnifierIcon, NativeIcons.drawable(resources, NativeIcons.MAGNIFIER))
+        magnifierText.text = magnification.label
+        modeIcon.visibility = View.GONE
+        modeText.visibility = View.GONE
+        focusModeIcon.visibility = View.GONE
+        focusModeText.visibility = View.GONE
     }
 
     private fun renderFocusMode(mode: FocusMode) {

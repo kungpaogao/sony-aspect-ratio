@@ -41,6 +41,7 @@
     </FrameLayout>
 
     <LinearLayout
+        android:id="@+id/shots_group"
         android:layout_width="wrap_content"
         android:layout_height="32px"
         android:layout_gravity="top|left"
@@ -67,6 +68,35 @@
             android:text="--"
             android:textSize="26px" />
     </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/magnifier_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/magnifier_icon"
+            android:layout_width="40px"
+            android:layout_height="36px"
+            android:layout_marginLeft="2px"
+            android:layout_marginTop="1px"
+            android:contentDescription="@null"
+            android:scaleType="fitXY"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/magnifier_text"
+            style="@style/OsdShadow"
+            android:layout_width="wrap_content"
+            android:layout_height="36px"
+            android:layout_marginLeft="42px"
+            android:layout_marginTop="1px"
+            android:gravity="center_vertical"
+            android:includeFontPadding="false"
+            android:textSize="26px" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/aspect_chip"
@@ -136,6 +166,15 @@
             android:textSize="26px"
             android:visibility="gone" />
     </FrameLayout>
+
+    <org.andrewgao.sony.aspectratio.ui.MagnifierNavigatorView
+        android:id="@+id/magnifier_navigator"
+        android:layout_width="96px"
+        android:layout_height="64px"
+        android:layout_gravity="bottom|left"
+        android:layout_marginLeft="40px"
+        android:layout_marginBottom="68px"
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/bottom_bar"

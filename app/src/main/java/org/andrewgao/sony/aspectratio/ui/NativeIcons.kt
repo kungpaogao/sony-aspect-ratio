@@ -25,6 +25,9 @@ object NativeIcons {
     private val BATTERY = intArrayOf(0x01080d4e, 0x01080509, 0x01080ca2, 0x01080335, 0x01080b0a)
     const val AF_DOT = 0x01080e84
 
+    /** Sony's `p_focusmagicon`, 40x36: a lens with a "+", shown top-left while punched in. */
+    const val MAGNIFIER = 0x0108072c
+
     // From Sony's res/layout-notlong/icon_focusmode.xml: the 4:3 screen's set, in a 70x60 slot,
     // identical in digital-filter, star-trails and time-lapse. The layout-long and EVF layouts use
     // other IDs.

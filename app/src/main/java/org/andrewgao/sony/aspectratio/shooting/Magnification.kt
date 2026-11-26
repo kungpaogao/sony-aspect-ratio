@@ -1,6 +1,7 @@
 package org.andrewgao.sony.aspectratio.shooting
 
 import kotlin.math.roundToInt
+import org.andrewgao.sony.aspectratio.CropRect
 
 /**
  * The camera's focus magnifier ("punch in"). [ratio] is ×100 (590 is ×5.9); [x] and [y] run from
@@ -16,6 +17,21 @@ data class Magnification(
     /** "×5.9" for 590, "" when off. */
     val label: String
         get() = if (on) "×" + (ratio / 100) + "." + (ratio % 100 / 10) else ""
+}
+
+/**
+ * The magnified area as a rectangle in a [width] by [height] frame, or null when off. It is `100 /
+ * ratio` of the frame in each direction, centered at [x],[y] and shifted to stay inside the frame.
+ */
+fun Magnification.zoneIn(width: Int, height: Int): CropRect? {
+    if (!on || ratio <= 0) return null
+    val zoneWidth = (width * 100 / ratio).coerceIn(1, maxOf(width, 1))
+    val zoneHeight = (height * 100 / ratio).coerceIn(1, maxOf(height, 1))
+    val centerX = (x + 1000) * width / 2000
+    val centerY = (y + 1000) * height / 2000
+    val left = (centerX - zoneWidth / 2).coerceIn(0, maxOf(width - zoneWidth, 0))
+    val top = (centerY - zoneHeight / 2).coerceIn(0, maxOf(height - zoneHeight, 0))
+    return CropRect(left, top, zoneWidth, zoneHeight)
 }
 
 /**

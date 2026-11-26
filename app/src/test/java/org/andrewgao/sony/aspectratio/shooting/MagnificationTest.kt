@@ -1,5 +1,6 @@
 package org.andrewgao.sony.aspectratio.shooting
 
+import org.andrewgao.sony.aspectratio.CropRect
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -106,5 +107,41 @@ class MagnificationTest {
         val grid = MagnifierGrid(100)
         assertEquals(Pair(0, 0), grid.moved(0, 0, 1, 1))
         assertEquals(Pair(0, 0), grid.toStep(500, 500))
+    }
+
+    @Test
+    fun zoneIsCenteredWhenTheCenterIsZero() {
+        // x7.2 of a 720x480 frame is 100x66, around (360, 240).
+        val zone = Magnification(on = true, ratio = 720).zoneIn(720, 480)
+        assertEquals(CropRect(310, 207, 100, 66), zone)
+    }
+
+    @Test
+    fun zoneFollowsTheCenter() {
+        val zone = Magnification(on = true, ratio = 1000, x = 500, y = -500).zoneIn(1000, 800)
+        // Center (750, 200), size 100x80.
+        assertEquals(CropRect(700, 160, 100, 80), zone)
+    }
+
+    @Test
+    fun zoneIsClampedInsideTheFrameAtTheCorners() {
+        val topLeft = Magnification(on = true, ratio = 1000, x = -1000, y = -1000)
+        assertEquals(CropRect(0, 0, 100, 80), topLeft.zoneIn(1000, 800))
+        val bottomRight = Magnification(on = true, ratio = 1000, x = 1000, y = 1000)
+        assertEquals(CropRect(900, 720, 100, 80), bottomRight.zoneIn(1000, 800))
+    }
+
+    @Test
+    fun zoneIsAtLeastOnePixel() {
+        val zone = Magnification(on = true, ratio = 100000).zoneIn(96, 64)!!
+        assertEquals(1, zone.width)
+        assertEquals(1, zone.height)
+    }
+
+    @Test
+    fun zoneIsNullWhenOffOrRatioIsNotPositive() {
+        assertNull(Magnification().zoneIn(96, 64))
+        assertNull(Magnification(on = false, ratio = 720).zoneIn(96, 64))
+        assertNull(Magnification(on = true, ratio = 0).zoneIn(96, 64))
     }
 }
