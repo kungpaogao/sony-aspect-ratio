@@ -10,7 +10,6 @@ import android.view.View
 import org.andrewgao.sony.aspectratio.AspectRatio
 import org.andrewgao.sony.aspectratio.CropRect
 
-/** Largest rectangle of the selected aspect that fits the preview, with the rest dimmed. */
 class CropOverlayView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
     private val dim = Paint()
     private val border = Paint()

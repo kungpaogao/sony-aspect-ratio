@@ -36,7 +36,6 @@ data class Exposure(
     }
 }
 
-/** Live exposure read from the open camera's parameters and shutter/aperture listeners. */
 class ShootingControls {
     private val mutableExposure = MutableStateFlow(Exposure())
     val exposure: StateFlow<Exposure> = mutableExposure
@@ -248,7 +247,6 @@ class ShootingControls {
         }
     }
 
-    /** Runs a while after a step; lets the camera's own value replace the stepped one. */
     private fun settle(aperture: Boolean) {
         val done =
             synchronized(lock) {
@@ -319,7 +317,6 @@ class ShootingControls {
         supportedIso = read("supportedIso", emptyList<Int>()) { params.supportedIso }
     }
 
-    /** Re-reads every value from the camera parameters. */
     fun refresh() {
         val active = camera ?: return
         val params = read("parameters", null) { active.parameters } ?: return
@@ -361,7 +358,8 @@ class ShootingControls {
 
     /**
      * Read once per attach, not on every [refresh]: nothing in the app changes the focus mode, and
-     * an earlier camera hang was suspected (never confirmed) to come from Sony's getAutoFocusMode.
+     * an earlier camera hang was suspected, though never confirmed, to come from Sony's
+     * getAutoFocusMode.
      */
     private fun readFocusMode(active: Camera) {
         val params = read("parameters", null) { active.parameters } ?: return
@@ -380,10 +378,7 @@ class ShootingControls {
         }
     }
 
-    /**
-     * Reads one value; a getter the emulator doesn't support falls back instead of failing the
-     * rest.
-     */
+    /** A getter the emulator doesn't support falls back instead of failing the rest. */
     private inline fun <T> read(name: String, fallback: T, getter: () -> T): T =
         try {
             getter()

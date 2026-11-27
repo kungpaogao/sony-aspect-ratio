@@ -47,8 +47,8 @@ class MagnificationTest {
 
     @Test
     fun stepGridKeepsTheFrameEdgeInsideTheRange() {
-        // 590 → a 339-unit frame, so the centre can go as far as 830.5 (rounded) and the frame
-        // edge stays at 1000.
+        // 590 → a 339-unit frame, so the centre can go as far as 830.5, rounded to 831, and the
+        // frame edge stays at 1000.
         val grid = MagnifierGrid(590)
         val (x, y) = grid.toCoordinate(12, -12)
         assertEquals(831, x)

@@ -63,7 +63,6 @@ class ExposureStepsTest {
 
     @Test
     fun shutterClampsToTheRangeWhicheverEndIsNamedFirst() {
-        // Min 30" and max 1/4000 (either order): nothing slower than 1/250 allowed here.
         val range = intArrayOf(1, 250, 1, 4000)
         assertEquals("1/250", label(ExposureSteps.nextShutter(1, 250, -1, false, range)!!))
         assertEquals("1/4000", label(ExposureSteps.nextShutter(1, 4000, 1, false, range)!!))

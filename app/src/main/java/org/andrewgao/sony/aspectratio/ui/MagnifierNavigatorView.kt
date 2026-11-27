@@ -53,8 +53,8 @@ class MagnifierNavigatorView(context: Context, attrs: AttributeSet?) : View(cont
     }
 
     private companion object {
-        // Sony's MF assist screen colors, RESID_LINESTYLE_MF_ASSIST_COLOR_* (background, outline,
-        // moving marker).
+        // Sony's MF assist screen colors for the background, outline and moving marker, from
+        // RESID_LINESTYLE_MF_ASSIST_COLOR_*.
         const val BACKGROUND_COLOR = 0x88000000.toInt()
         const val FRAME_COLOR = 0xFFDDDDDD.toInt()
         const val MARKER_COLOR = 0xFFDD5500.toInt()

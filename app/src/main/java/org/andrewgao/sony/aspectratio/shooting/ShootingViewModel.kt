@@ -26,8 +26,8 @@ class ShootingViewModel(
     private var started = false
 
     /**
-     * What the AF/MF/AEL button's current press does, chosen on key down. Back-button focus: AEL
-     * holds focus and the shutter shoots with it; half-press does nothing.
+     * Chosen on key down. Back-button focus: AEL holds focus and the shutter shoots with it;
+     * half-press does nothing.
      */
     private var pressedButton: FocusButton? = null
 
@@ -112,7 +112,7 @@ class ShootingViewModel(
             Trace.line("lever " + CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS))
             return true
         }
-        // Only the a7R's shared button (638) depends on the lever.
+        // Only the a7R's shared button, 638, depends on the lever.
         val lever =
             if (key == CameraKeys.AF_MF_AEL) CameraKeys.getStatus(CameraKeys.SLIDE_AEL_FOCUS) else 0
         val button = focusButton(key, lever)

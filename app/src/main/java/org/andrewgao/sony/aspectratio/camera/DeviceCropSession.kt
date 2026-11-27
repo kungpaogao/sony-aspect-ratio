@@ -20,9 +20,9 @@ import org.andrewgao.sony.aspectratio.shooting.rotationDegrees
  */
 class DeviceCropSession(
     /**
-     * Hides and reshows the preview SurfaceView. After a crop the camera is released and reopening
-     * it on the old surface fails ("Overlay Creation Failed"); the new surface's callback reopens
-     * it.
+     * Hides and reshows the preview SurfaceView. After a crop the camera is released, and reopening
+     * it on the old surface fails with "Overlay Creation Failed"; the new surface's callback
+     * reopens it.
      */
     private val recreateSurface: () -> Unit,
     onStatus: (String) -> Unit,
@@ -33,7 +33,7 @@ class DeviceCropSession(
         val media = media ?: MediaManager.create(context).also { media = it }
         val id = awaitStoredImage(active, media)
         Trace.line("image added $id")
-        // StillPlay's decodeImage answers BUSY (0x1004) while the shooting camera is open; Sony's
+        // StillPlay's decodeImage answers BUSY, 0x1004, while the shooting camera is open; Sony's
         // ShootingState.onPause stops the preview and halts CameraEx before playback, so do the
         // same.
         release()
@@ -44,7 +44,6 @@ class DeviceCropSession(
         }
     }
 
-    /** Shoots and waits for the camera to add the picture to the media store. */
     private suspend fun awaitStoredImage(active: Camera, media: MediaManager): Long =
         suspendCancellableCoroutine { continuation ->
             media.setImageAddedListener { id ->
@@ -94,7 +93,6 @@ class DeviceCropSession(
         }
     }
 
-    /** Finds the new crop in the image list and rotates it so playback shows it upright. */
     private fun rotateSavedCrop(
         media: MediaManager,
         originalId: Long,

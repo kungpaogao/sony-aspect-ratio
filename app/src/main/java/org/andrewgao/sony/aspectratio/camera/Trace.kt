@@ -8,8 +8,8 @@ import java.io.IOException
 import java.util.concurrent.Executors
 
 /**
- * Appends a line to ar.txt on the card and to logcat. Logcat is written at once; the card is slow
- * (4-40 ms a line), so one background thread writes the file in order.
+ * Appends a line to ar.txt on the card and to logcat. Logcat is written at once; the card is slow,
+ * 4-40 ms a line, so one background thread writes the file in order.
  */
 object Trace {
     val file = File(Environment.getExternalStorageDirectory(), "ar.txt")

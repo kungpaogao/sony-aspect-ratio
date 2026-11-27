@@ -6,10 +6,7 @@ import java.util.Locale
 import kotlin.math.abs
 import org.andrewgao.sony.aspectratio.camera.Exposure
 
-/**
- * Formats camera values the way the native shooting screen shows them (rules from Sony's own
- * views).
- */
+/** Formats values the way the native shooting screen shows them, by rules from Sony's own views. */
 object ExposureFormat {
     private const val SHOTS_CAP = 9999
 
@@ -45,12 +42,11 @@ object ExposureFormat {
     /** ISO 0 means auto. */
     fun iso(value: Int): String = if (value == 0) "AUTO" else value.toString()
 
-    /** Empty when unknown; the native screen caps the count at 9999. */
+    /** The native screen caps the count at 9999. */
     fun shots(count: Int): String = if (count < 0) "" else minOf(count, SHOTS_CAP).toString()
 
     fun battery(percent: Int): String = if (percent < 0) "" else "$percent%"
 
-    /** Native battery icon level: 4 above 80%, 3 above 50%, 2 above 20%, 1 above 0, -1 unknown. */
     fun batteryLevel(percent: Int): Int =
         when {
             percent < 0 -> -1

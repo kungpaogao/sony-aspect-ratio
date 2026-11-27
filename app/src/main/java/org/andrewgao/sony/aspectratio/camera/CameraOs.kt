@@ -4,12 +4,12 @@ import android.app.Activity
 import android.content.Intent
 
 /**
- * Registers the app with the camera OS's arbiter (DAConnectionManagerService), as Sony's shooting
- * apps do on every resume (`AppInfo.notifyAppInfo` in their base app).
+ * Registers the app with the camera OS's arbiter, DAConnectionManagerService, as Sony's shooting
+ * apps do on every resume through `AppInfo.notifyAppInfo` in their base app.
  *
  * The arbiter decides which keys pull the camera back to its own shooting mode. Without this it
  * keeps the last list it was given, often the app menu's, which includes the shutter half-press, so
- * a half-press could drop out of the app. [PULLING_BACK_KEYS] also lists ▶ (KEY_PLAY) so playback
+ * a half-press could drop out of the app. [PULLING_BACK_KEYS] also lists ▶, KEY_PLAY, so playback
  * is the camera's own; leaving it lands in the camera's shooting mode and this app is reopened from
  * the menu.
  */

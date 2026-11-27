@@ -4,7 +4,6 @@ import kotlin.math.abs
 import kotlin.math.ln
 import kotlin.math.min
 
-/** A shutter speed as Sony's numerator/denominator pair. */
 data class ShutterSpeed(val numerator: Int, val denominator: Int) {
     val seconds: Double
         get() = numerator.toDouble() / denominator
@@ -12,13 +11,12 @@ data class ShutterSpeed(val numerator: Int, val denominator: Int) {
 
 /**
  * The aperture and shutter steps the dials walk through, so the readout can move before the camera
- * reports the new value. Pure, so it can be tested without a camera.
+ * reports the new value.
  */
 object ExposureSteps {
     /** Two values closer than this many stops are the same step. */
     const val SAME_STOPS = 0.1
 
-    /** Half-stop exposure steps (evStep 0.5) use the half-stop tables. */
     fun isHalfStop(evStep: Float): Boolean = abs(evStep - 0.5f) < 0.1f
 
     /** F-number x100 in 1/3-stop steps, as Sony labels them. */
@@ -112,8 +110,8 @@ object ExposureSteps {
         )
 
     /**
-     * The aperture [steps] away from [currentX100] (positive is a larger f-number), inside [range]
-     * (`{min, max}` x100) when known. Null without a lens.
+     * Positive [steps] move to a larger f-number. [range] is `{min, max}` x100 when known. Null
+     * without a lens.
      */
     fun nextAperture(currentX100: Int, steps: Int, halfStop: Boolean, range: IntArray?): Int? {
         if (currentX100 <= 0) return null
@@ -133,8 +131,8 @@ object ExposureSteps {
     }
 
     /**
-     * The shutter speed [steps] away from the current one (positive is faster), inside [range]
-     * (`{minN, minD, maxN, maxD}`) when known. Null for BULB or an unknown speed.
+     * Positive [steps] move to a faster speed. [range] is `{minN, minD, maxN, maxD}` when known.
+     * Null for BULB or an unknown speed.
      */
     fun nextShutter(
         numerator: Int,
@@ -174,10 +172,9 @@ object ExposureSteps {
             b.numerator > 0 &&
             abs(stops(a.seconds, b.seconds)) < SAME_STOPS
 
-    /** Stops of [a] over [b]: positive when [a] is the longer time. */
     private fun stops(a: Double, b: Double): Double = ln(a / b) / LN2
 
-    /** Stops of f-number [a] over [b]: light falls with the square of the f-number. */
+    /** Doubled because light falls with the square of the f-number. */
     private fun apertureStops(a: Int, b: Int): Double = 2 * ln(a.toDouble() / b) / LN2
 
     private val LN2 = ln(2.0)

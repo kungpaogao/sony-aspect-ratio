@@ -9,7 +9,6 @@ import com.github.ma1co.openmemories.framework.MediaManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Battery percent and shots remaining from system broadcasts and MediaManager. */
 class DeviceStatus {
     private val mutableBattery = MutableStateFlow(-1)
     val battery: StateFlow<Int> = mutableBattery
@@ -53,7 +52,6 @@ class DeviceStatus {
         context = null
     }
 
-    /** -1 when the broadcast doesn't carry a level. */
     private fun batteryPercent(intent: Intent): Int {
         val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1)
         val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1)

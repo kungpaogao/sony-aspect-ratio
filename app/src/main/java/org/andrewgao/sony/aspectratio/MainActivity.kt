@@ -112,7 +112,7 @@ class MainActivity : Activity() {
                 )
                 .forEach { it.typeface = univers }
         }
-        // After the typeface, which measureText uses. The widest values each readout can show.
+        // After the typeface, which measureText uses.
         val shutterWidth = shutterText.reserveWidthFor("1/8000", "BULB", "30\"", "0.5\"")
         val apertureWidth = apertureText.reserveWidthFor("F22", "F5.6", "F--")
         val exposureWidth = exposureText.reserveWidthFor("+5.0", "-5.0", "±0.0")
@@ -183,7 +183,7 @@ class MainActivity : Activity() {
             shoot()
             return true
         }
-        // Logged so a camera run shows what unmapped buttons (like AEL on the a7R) actually send.
+        // Logged so a camera run shows what unmapped buttons actually send.
         Trace.line("key $keyCode scan ${event.scanCode} unhandled")
         return super.onKeyDown(keyCode, event)
     }
@@ -240,10 +240,8 @@ class MainActivity : Activity() {
     }
 
     /**
-     * The magnifier's own OSD: its icon and ratio top-left and the zone map bottom-left, in place
-     * of the exposure mode, shots, aspect chip and focus mode. Runs after the per-element rendering
-     * above so it has the last word on visibility; with the magnifier off the mode icons keep what
-     * that rendering gave them.
+     * Runs after the per-element rendering in [render] so it has the last word on visibility; with
+     * the magnifier off the mode icons keep what that rendering gave them.
      */
     private fun renderMagnifier(magnification: Magnification) {
         val on = magnification.on
@@ -266,7 +264,7 @@ class MainActivity : Activity() {
 
     /**
      * Sizes [frame] to the crop the overlay draws, so what it centers sits in the middle of the
-     * crop. Until the live view area is known it keeps filling the screen.
+     * crop.
      */
     private fun fitToCrop(frame: View, state: ShootingState) {
         val liveView = state.liveView ?: return
@@ -321,7 +319,6 @@ class MainActivity : Activity() {
         }
     }
 
-    /** Shows the camera's own [drawable] in [icon] when there is one, else the text [fallback]. */
     private fun showIcon(icon: ImageView, drawable: Drawable?, fallback: View? = null) {
         icon.setImageDrawable(drawable)
         icon.visibility = if (drawable != null) View.VISIBLE else View.GONE

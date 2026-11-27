@@ -7,9 +7,9 @@ import org.andrewgao.sony.aspectratio.shooting.ExposureMode
 import org.andrewgao.sony.aspectratio.shooting.FocusMode
 
 /**
- * The camera's own OSD icons. They aren't bundled in Sony's apps; they are system resources
- * (package 0x01) that every Sony app references by these IDs. See docs/native-osd-icons.md. The IDs
- * point at unrelated drawables (or nothing) off the camera, so [drawable] returns null there and
+ * The camera's own OSD icons. They aren't bundled in Sony's apps; they are system resources in
+ * package 0x01 that every Sony app references by these IDs. See docs/native-osd-icons.md. Off the
+ * camera the IDs point at unrelated drawables or at nothing, so [drawable] returns null there and
  * the views show text instead.
  */
 object NativeIcons {
@@ -21,7 +21,7 @@ object NativeIcons {
     const val ISO_LABEL = 0x0108050b
     const val EV = 0x010810fc
     const val CARD = 0x01080d7f
-    /** Battery icon for levels 0 (empty) to 4 (full). */
+    /** Battery icons by level, from empty at 0 to full at 4. */
     private val BATTERY = intArrayOf(0x01080d4e, 0x01080509, 0x01080ca2, 0x01080335, 0x01080b0a)
     const val AF_DOT = 0x01080e84
 

@@ -2,10 +2,7 @@ package org.andrewgao.sony.aspectratio.shooting
 
 import com.github.ma1co.openmemories.framework.CameraParameters
 
-/**
- * Exposure mode as the top-left of the screen shows it. On a Sony camera the scene mode is the
- * exposure mode.
- */
+/** On a Sony camera the scene mode is the exposure mode. */
 enum class ExposureMode(val label: String) {
     PROGRAM("P"),
     APERTURE("A"),

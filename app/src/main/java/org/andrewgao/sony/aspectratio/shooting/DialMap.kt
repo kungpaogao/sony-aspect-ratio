@@ -12,10 +12,7 @@ sealed class DialAction {
     data class Iso(val steps: Int) : DialAction()
 }
 
-/**
- * Maps a dial or wheel key (the a7R control wheel is DIAL_3) to what it should change in [mode].
- * Clockwise is +1.
- */
+/** The a7R's control wheel is DIAL_3. */
 fun dialAction(mode: ExposureMode, key: Int): DialAction? {
     val steps =
         when (key) {

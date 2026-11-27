@@ -11,7 +11,7 @@ import org.andrewgao.sony.aspectratio.shooting.MagnifierGrid
 import org.andrewgao.sony.aspectratio.shooting.nextLevel
 
 /**
- * The camera's focus magnifier ("punch in"): cycled with the AF/MF button, moved with the d-pad,
+ * The camera's focus magnifier, or punch-in: cycled with the AF/MF button, moved with the d-pad,
  * and started by the camera's focus ring in MF and DMF when its "MF Assist" setting is on.
  *
  * Sony's callbacks may arrive off the main thread, so they are posted to the main looper before
@@ -106,7 +106,6 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         loggedFailures.clear()
     }
 
-    /** The button: off → the first level → … → the last level → off. */
     fun cycle() {
         val current = mutableState.value
         val next = nextLevel(levels, if (current.on) current.level else null)
@@ -122,7 +121,6 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         }
     }
 
-    /** The d-pad: one grid step ([dx], [dy] are −1, 0 or 1) at the current level. */
     fun move(dx: Int, dy: Int) {
         val current = mutableState.value
         if (!current.on) return
@@ -133,7 +131,6 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         }
     }
 
-    /** Back to the center at the same level. */
     fun recenter() {
         val current = mutableState.value
         if (!current.on) return
@@ -157,9 +154,7 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         mutableState.value = Magnification()
     }
 
-    /**
-     * Asks the camera to magnify at [level] around ([x], [y]); true when it accepted the request.
-     */
+    /** True when the camera accepted the request. */
     private fun magnify(level: Int, x: Int, y: Int): Boolean {
         val active = camera ?: return false
         try {
@@ -176,7 +171,7 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         return true
     }
 
-    /** The camera is authoritative, including when it magnifies on its own (firmware MF Assist). */
+    /** The camera is authoritative, including when firmware MF Assist magnifies on its own. */
     private fun changed(on: Boolean, ratio: Int, level: Int, x: Int, y: Int) {
         if (camera == null) return
         Trace.line("magnifier on=$on ratio=$ratio level=$level at $x,$y")
@@ -196,8 +191,8 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         if (rotating) {
             val manual = mode == FocusMode.MF || mode == FocusMode.DMF
             if (!current.on && mfAssist && manual && levels.isNotEmpty()) {
-                // In DMF the point is where AF focused. In MF the a7R reports -1000,-1000 (no
-                // point); like Sony's MF Assist, reuse the last position, which starts centered.
+                // In DMF the point is where AF focused. In MF the a7R reports -1000,-1000, meaning
+                // no point; like Sony's MF Assist, reuse the last position, which starts centered.
                 val known = x != NO_POSITION || y != NO_POSITION
                 val atX = if (known) x else lastX
                 val atY = if (known) y else lastY
@@ -208,10 +203,7 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         }
     }
 
-    /**
-     * Reads one value; a getter the emulator doesn't support falls back instead of failing the
-     * rest.
-     */
+    /** A getter the emulator doesn't support falls back instead of failing the rest. */
     private inline fun <T> read(name: String, fallback: T, getter: () -> T): T =
         try {
             getter()
@@ -223,7 +215,7 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         }
 
     private companion object {
-        /** What the a7R reports for the focus-ring position when there is none (MF). */
+        /** What the a7R reports for the focus-ring position when there is none, as in MF. */
         const val NO_POSITION = -1000
     }
 }

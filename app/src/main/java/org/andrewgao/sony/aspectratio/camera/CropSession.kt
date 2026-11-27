@@ -13,19 +13,14 @@ import org.andrewgao.sony.aspectratio.AspectRatio
 import org.andrewgao.sony.aspectratio.CropRect
 
 /**
- * Owns the camera while the app is in front: shows the live view, takes a picture, crops it to the
- * selected aspect, and saves the crop as a second JPEG. The original stays on the card.
- *
- * How the picture comes back differs by device, so [create] picks a subclass, like the framework's
- * Camera / DeviceCamera:
- * - [DeviceCropSession] on a Sony camera reads the stored picture back from the card.
- * - [EmulatorCropSession] elsewhere gets the JPEG bytes from the Android camera.
+ * Owns the camera while the app is in front and saves each crop as a second JPEG; the original
+ * stays on the card. How the picture comes back differs by device, so [create] picks a subclass,
+ * like the framework's Camera and DeviceCamera.
  */
 abstract class CropSession(private val onStatus: (String) -> Unit) {
     private var camera: Camera? = null
     val controls = ShootingControls()
 
-    /** The camera's Auto Review setting, put back on release; null until it has been read. */
     private var savedAutoReview: Int? = null
 
     fun open(holder: SurfaceHolder) {
@@ -95,7 +90,6 @@ abstract class CropSession(private val onStatus: (String) -> Unit) {
         aspect: AspectRatio,
     ): String
 
-    /** Crops [source] to [aspect] and saves the crop as a new JPEG. */
     protected fun cropAndSave(
         context: Context,
         source: StillImage,

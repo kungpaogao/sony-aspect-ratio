@@ -17,7 +17,7 @@ object OsdTypeface {
         }
     }
 
-    /** Names of the public static [Typeface] fields on [Typeface], to find a condensed variant. */
+    /** Logged to look for a condensed variant among the firmware's typefaces. */
     fun names(): List<String> =
         Typeface::class
             .java
