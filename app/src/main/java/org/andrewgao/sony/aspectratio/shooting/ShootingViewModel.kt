@@ -189,6 +189,7 @@ class ShootingViewModel(
         Trace.line("shutter " + aspect.label)
         // Sony leaves magnification before shooting.
         if (state.value.magnification.on) session.controls.magnifier.stop()
+        session.controls.flushIso()
         shot = scope.launch {
             setState { copy(shooting = true) }
             try {
