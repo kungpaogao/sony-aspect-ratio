@@ -9,14 +9,16 @@ import android.content.Intent
  *
  * The arbiter decides which keys pull the camera back to its own shooting mode. Without this it
  * keeps the last list it was given, often the app menu's, which includes the shutter half-press, so
- * a half-press could drop out of the app.
+ * a half-press could drop out of the app. [PULLING_BACK_KEYS] also lists ▶ (KEY_PLAY) so playback
+ * is the camera's own; leaving it lands in the camera's shooting mode and this app is reopened from
+ * the menu.
  */
 object CameraOs {
     private const val ACTION_APP_INFO =
         "com.android.server.DAConnectionManagerService.AppInfoReceive"
 
-    /** Sony's `BaseApp.PULLING_BACK_KEYS_FOR_SHOOTING`: only a USB connection leaves the app. */
-    private val PULLING_BACK_KEYS = arrayOf("KEY_USB_CONNECT")
+    /** Plugging in USB, and ▶, hand the camera back to its own modes; the app has no playback. */
+    private val PULLING_BACK_KEYS = arrayOf("KEY_USB_CONNECT", "KEY_PLAY")
 
     /** Sony's `BaseApp.RESUME_KEYS_FOR_SHOOTING`: power-on and wake-up paths that return here. */
     private val RESUME_KEYS =
