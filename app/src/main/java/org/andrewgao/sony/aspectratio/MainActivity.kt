@@ -173,6 +173,7 @@ class MainActivity : Activity() {
         if (
             mapped == CameraKeys.MENU ||
                 mapped == CameraKeys.DELETE ||
+                mapped == CameraKeys.CUSTOM_1 ||
                 keyCode == KeyEvent.KEYCODE_BACK
         ) {
             leave()
@@ -325,6 +326,7 @@ class MainActivity : Activity() {
         fallback?.visibility = if (drawable != null) View.GONE else View.VISIBLE
     }
 
+    /** On the camera HOME is Sony's app launcher, which opens in its app list mode. */
     private fun leave() {
         if (leaving) return
         leaving = true
