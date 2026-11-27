@@ -10,6 +10,7 @@ import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.andrewgao.sony.aspectratio.AspectRatio
+import org.andrewgao.sony.aspectratio.shooting.rotationDegrees
 
 /**
  * On a Sony camera the camera saves its own JPEG and [MediaManager.setImageAddedListener] reports
@@ -67,19 +68,52 @@ class DeviceCropSession(
     ): String {
         val info = media.getImageInfo(id)
         try {
+            val orientation = info.orientation
+            val degrees = rotationDegrees(orientation)
+            Trace.line("image $id orientation $orientation")
             val source = decode(info) ?: return "decodeImage failed for image $id"
             try {
-                return cropAndSave(
-                    context,
-                    source,
-                    aspect,
-                    media.mediaIds.firstOrNull() ?: "external",
-                )
+                val status =
+                    cropAndSave(
+                        context,
+                        source,
+                        aspect,
+                        media.mediaIds.firstOrNull() ?: "external",
+                    )
+                // JpegExporter saves with no EXIF orientation, so fix the crop like Photo Retouch
+                // does.
+                if (degrees != 0 && status.startsWith("saved ")) {
+                    rotateSavedCrop(media, id, degrees, orientation)
+                }
+                return status
             } finally {
                 source.release()
             }
         } finally {
             info.release()
+        }
+    }
+
+    /** Finds the new crop in the image list and rotates it so playback shows it upright. */
+    private fun rotateSavedCrop(
+        media: MediaManager,
+        originalId: Long,
+        degrees: Int,
+        orientation: Int,
+    ) {
+        val cursor = media.queryImages() ?: return
+        try {
+            val newId = if (cursor.moveToLast()) media.getImageId(cursor) else 0L
+            if (newId <= originalId) {
+                Trace.line("rotate crop: newest image $newId is not newer than $originalId")
+                return
+            }
+            val ok = media.rotateImage(newId, degrees)
+            Trace.line("rotated crop $newId by $degrees for orientation $orientation: $ok")
+        } catch (error: Exception) {
+            Trace.line("rotate crop " + describe(error))
+        } finally {
+            cursor.close()
         }
     }
 
