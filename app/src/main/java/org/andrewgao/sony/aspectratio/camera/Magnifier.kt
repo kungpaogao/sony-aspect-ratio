@@ -33,6 +33,13 @@ class Magnifier(private val focusMode: () -> FocusMode) {
 
     /** True when the button started the magnification, which the MF Assist timeout never ends. */
     private var byButton = false
+
+    /**
+     * True from attach until the camera's first report or the app's first request. A report of on
+     * in that window is left over from before the camera was reopened; the live view is not
+     * magnified.
+     */
+    private var firstReport = true
     private var lastX = 0
     private var lastY = 0
 
@@ -54,6 +61,7 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         mfAssistSeconds = read("mfAssistSeconds", 0) { params?.mfAssistSeconds ?: 0 }
         grid = MagnifierGrid(ratios.values.minOrNull() ?: 0)
         byButton = false
+        firstReport = true
         lastX = 0
         lastY = 0
         mutableState.value = Magnification()
@@ -154,6 +162,16 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         mutableState.value = Magnification()
     }
 
+    /** Clears a magnification the camera kept across a reopen, so it matches the live view. */
+    private fun stopStale() {
+        val active = camera ?: return
+        try {
+            active.stopPreviewMagnification()
+        } catch (error: Exception) {
+            Trace.line("magnifier stale stop " + error.message)
+        }
+    }
+
     /** True when the camera accepted the request. */
     private fun magnify(level: Int, x: Int, y: Int): Boolean {
         val active = camera ?: return false
@@ -166,14 +184,26 @@ class Magnifier(private val focusMode: () -> FocusMode) {
         }
         lastX = x
         lastY = y
+        firstReport = false
         // Optimistic; the camera's callback replaces it with what it actually did.
         mutableState.value = Magnification(true, ratios[level] ?: 0, level, x, y)
         return true
     }
 
-    /** The camera is authoritative, including when firmware MF Assist magnifies on its own. */
+    /**
+     * The camera is authoritative after its first report, which can repeat a magnification from
+     * before the camera was reopened.
+     */
     private fun changed(on: Boolean, ratio: Int, level: Int, x: Int, y: Int) {
         if (camera == null) return
+        if (firstReport) {
+            firstReport = false
+            if (on) {
+                Trace.line("magnifier stale on=$on ratio=$ratio level=$level at $x,$y ignored")
+                stopStale()
+                return
+            }
+        }
         Trace.line("magnifier on=$on ratio=$ratio level=$level at $x,$y")
         if (!on) {
             handler.removeCallbacks(stopAfterRing)
